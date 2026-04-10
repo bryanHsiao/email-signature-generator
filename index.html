@@ -494,12 +494,18 @@
           <div class="email-body-text">Hi，附上相關資料，如有任何問題請不吝告知，謝謝。</div>
           <div class="email-divider"></div>
           <div class="edit-hint"><span class="edit-hint-text">✏️ 點擊簽名中的任意文字即可直接編輯</span></div>
+          <div style="font-size:11px;color:#888;padding:4px 8px 2px 8px;line-height:1.6;">
+            💡 <b>HCL Notes</b> 建議使用「🖼 下載圖片」，在簽名設定中插入圖片檔案｜<b>Outlook / Gmail</b> 使用「複製 HTML」貼入簽名設定
+          </div>
           <div id="signaturePreview"></div>
         </div>
       </div>
 
       <!-- Copy / Download buttons -->
       <div class="copy-row">
+        <button class="btn-copy btn-copy-image" id="downloadImgBtn">
+          🖼 下載圖片
+        </button>
         <button class="btn-copy btn-copy-html" id="copyHtmlBtn">
           <span>⊞</span> 複製 HTML
         </button>
@@ -508,9 +514,6 @@
         </button>
         <button class="btn-copy btn-copy-download" id="downloadHtmlBtn">
           <span>⬇</span> 下載 HTML
-        </button>
-        <button class="btn-copy btn-copy-image" id="downloadImgBtn">
-          🖼 下載圖片
         </button>
       </div>
 
