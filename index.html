@@ -457,8 +457,12 @@
         </div>
         <!-- 姓名字體 -->
         <div class="field" style="margin-top:12px;">
-          <label>姓名字體</label>
-          <div id="fontBtns" style="display:flex;gap:8px;flex-wrap:wrap;margin-top:4px;"></div>
+          <label>英文字體</label>
+          <div id="fontBtnsEn" style="display:flex;gap:6px;flex-wrap:wrap;margin-top:4px;"></div>
+        </div>
+        <div class="field" style="margin-top:8px;">
+          <label>中文字體</label>
+          <div id="fontBtnsZh" style="display:flex;gap:6px;flex-wrap:wrap;margin-top:4px;"></div>
         </div>
       </div>
 
@@ -538,9 +542,10 @@ const state = {
   logoWidth:  44,
   logoHeight: 43,
   scheme:    'blue',
-  nameColor: '#1a1a2e',
-  nameFont:  'default',
-  showDots:  true,
+  nameColor:    '#1a1a2e',
+  nameFontEn:   'default',
+  nameFontZh:   'default',
+  showDots:     true,
   labelTieLine: '公司電話',
   labelMobile:  '行動電話',
   labelEmail:   '電子郵件',
@@ -558,6 +563,14 @@ const FONTS = {
   elegant:     { name: '優雅',   family: "'Playfair Display',serif",           google: 'Playfair+Display:ital,wght@0,700;1,700' },
   modern:      { name: '現代',   family: "'Raleway',sans-serif",               google: 'Raleway:wght@700' },
   typewriter:  { name: '打字機', family: "'Courier New',Courier,monospace",    google: null },
+};
+
+const FONTS_ZH = {
+  default:   { name: '預設',  family: 'Arial,Helvetica,sans-serif' },
+  kaiti:     { name: '楷體',  family: "'KaiTi','楷體','標楷體',cursive" },
+  mingliu:   { name: '明體',  family: "'PMingLiU','新細明體','MingLiU',serif" },
+  jhenghei:  { name: '黑體',  family: "'Microsoft JhengHei','微軟正黑體',sans-serif" },
+  fangsong:  { name: '仿宋',  family: "'FangSong','仿宋',serif" },
 };
 
 const FONT_LOADED = new Set();
@@ -776,8 +789,14 @@ function generateSignatureHTML(forPreview = false) {
           style="background-color:#ffffff;padding:12px 16px;">
 
         <!-- Name -->
-        <p style="margin:0 0 8px 0;padding:0;font-size:17px;font-weight:700;color:${state.nameColor};font-family:${FONTS[state.nameFont].family};line-height:1.2;">
-          ${ed('nameEn', nameEn)}&nbsp;&nbsp;${ed('nameZh', nameZh)}
+        <p style="margin:0 0 8px 0;padding:0;font-size:17px;font-weight:700;color:${state.nameColor};line-height:1.2;">
+          ${forPreview
+            ? `<span contenteditable="true" data-field="nameEn" class="editable-label" style="font-family:${FONTS[state.nameFontEn].family};">${esc(nameEn)}</span>`
+            : `<span style="font-family:${FONTS[state.nameFontEn].family};">${esc(nameEn)}</span>`
+          }&nbsp;&nbsp;${forPreview
+            ? `<span contenteditable="true" data-field="nameZh" class="editable-label" style="font-family:${FONTS_ZH[state.nameFontZh].family};">${esc(nameZh)}</span>`
+            : `<span style="font-family:${FONTS_ZH[state.nameFontZh].family};">${esc(nameZh)}</span>`
+          }
         </p>
 
         <!-- Contact rows -->
@@ -951,24 +970,26 @@ function selectScheme(key) {
 /* ================================================================
    RENDER FONT BUTTONS
    ================================================================ */
-function renderFontBtns() {
-  const container = document.getElementById('fontBtns');
-  if (!container) return;
-  container.innerHTML = Object.entries(FONTS).map(([key, f]) => {
-    const active = key === state.nameFont;
-    return `<button onclick="selectFont('${key}')"
-      style="padding:5px 12px;border-radius:6px;border:1px solid ${active ? 'var(--a1)' : 'rgba(255,255,255,0.15)'};
-             background:${active ? 'rgba(var(--a1-rgb,0,102,255),0.15)' : 'transparent'};
-             color:${active ? 'var(--a1)' : 'var(--text-sub)'};
-             font-family:${f.family};font-size:13px;cursor:pointer;transition:all 0.15s;white-space:nowrap;">
-      ${f.name}
-    </button>`;
-  }).join('');
+function makeFontBtn(key, f, active, lang) {
+  return `<button onclick="selectFont('${lang}','${key}')"
+    style="padding:5px 12px;border-radius:6px;border:1px solid ${active ? 'var(--a1)' : 'rgba(255,255,255,0.15)'};
+           background:${active ? 'rgba(0,102,255,0.12)' : 'transparent'};
+           color:${active ? 'var(--a1)' : 'var(--text-sub)'};
+           font-family:${f.family};font-size:13px;cursor:pointer;transition:all 0.15s;white-space:nowrap;">
+    ${f.name}
+  </button>`;
 }
 
-function selectFont(key) {
-  loadGoogleFont(key);
-  state.nameFont = key;
+function renderFontBtns() {
+  const en = document.getElementById('fontBtnsEn');
+  const zh = document.getElementById('fontBtnsZh');
+  if (en) en.innerHTML = Object.entries(FONTS).map(([k, f]) => makeFontBtn(k, f, k === state.nameFontEn, 'en')).join('');
+  if (zh) zh.innerHTML = Object.entries(FONTS_ZH).map(([k, f]) => makeFontBtn(k, f, k === state.nameFontZh, 'zh')).join('');
+}
+
+function selectFont(lang, key) {
+  if (lang === 'en') { loadGoogleFont(key); state.nameFontEn = key; }
+  else               { state.nameFontZh = key; }
   renderFontBtns();
   updatePreview();
 }
