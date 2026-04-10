@@ -560,19 +560,28 @@ const DEFAULT_LOGO = { src: state.logoSrc, w: state.logoWidth, h: state.logoHeig
    COLOR SCHEMES
    ================================================================ */
 const FONTS = {
-  default:     { name: '預設',   family: 'Arial,Helvetica,sans-serif',        google: null },
-  cursive:     { name: '草書',   family: "'Dancing Script',cursive",           google: 'Dancing+Script:wght@700' },
-  elegant:     { name: '優雅',   family: "'Playfair Display',serif",           google: 'Playfair+Display:ital,wght@0,700;1,700' },
-  modern:      { name: '現代',   family: "'Raleway',sans-serif",               google: 'Raleway:wght@700' },
-  typewriter:  { name: '打字機', family: "'Courier New',Courier,monospace",    google: null },
+  default:      { name: '預設',     family: 'Arial,Helvetica,sans-serif',          google: null },
+  cursive:      { name: '草書',     family: "'Dancing Script',cursive",             google: 'Dancing+Script:wght@700' },
+  pacifico:     { name: '圓體草書', family: "'Pacifico',cursive",                   google: 'Pacifico' },
+  lobster:      { name: '龍蝦體',   family: "'Lobster',cursive",                    google: 'Lobster' },
+  elegant:      { name: '優雅',     family: "'Playfair Display',serif",             google: 'Playfair+Display:wght@700' },
+  merriweather: { name: '書報體',   family: "'Merriweather',serif",                 google: 'Merriweather:wght@700' },
+  montserrat:   { name: '幾何',     family: "'Montserrat',sans-serif",              google: 'Montserrat:wght@700' },
+  modern:       { name: '現代',     family: "'Raleway',sans-serif",                 google: 'Raleway:wght@700' },
+  oswald:       { name: '窄體',     family: "'Oswald',sans-serif",                  google: 'Oswald:wght@700' },
+  georgia:      { name: '古典',     family: "Georgia,'Times New Roman',serif",      google: null },
+  typewriter:   { name: '打字機',   family: "'Courier New',Courier,monospace",      google: null },
 };
 
 const FONTS_ZH = {
-  default:   { name: '預設',  family: 'Arial,Helvetica,sans-serif' },
-  kaiti:     { name: '楷體',  family: "'KaiTi','楷體','標楷體',cursive" },
-  mingliu:   { name: '明體',  family: "'PMingLiU','新細明體','MingLiU',serif" },
-  jhenghei:  { name: '黑體',  family: "'Microsoft JhengHei','微軟正黑體',sans-serif" },
-  fangsong:  { name: '仿宋',  family: "'FangSong','仿宋',serif" },
+  default:    { name: '預設',    family: 'Arial,Helvetica,sans-serif' },
+  jhenghei:   { name: '微軟正黑', family: "'Microsoft JhengHei','微軟正黑體',sans-serif" },
+  yahei:      { name: '微軟雅黑', family: "'Microsoft YaHei','微軟雅黑',sans-serif" },
+  pingfang:   { name: '蘋方',    family: "'PingFang TC','蘋方-繁',sans-serif" },
+  kaiti:      { name: '楷體',    family: "'KaiTi','楷體','標楷體',cursive" },
+  mingliu:    { name: '新細明體', family: "'PMingLiU','新細明體','MingLiU',serif" },
+  simsun:     { name: '宋體',    family: "'SimSun','宋體',serif" },
+  fangsong:   { name: '仿宋',    family: "'FangSong','仿宋',serif" },
 };
 
 const FONT_LOADED = new Set();
