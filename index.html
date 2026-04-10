@@ -118,7 +118,15 @@
       padding: 24px 0 16px;
     }
     @media (max-width: 860px) {
-      .split { grid-template-columns: 1fr; overflow-y: auto; }
+      html, body { height: auto; overflow: auto; }
+      .app  { height: auto; overflow: visible; display: block; padding-bottom: 48px; }
+      .split {
+        grid-template-columns: 1fr;
+        height: auto; overflow: visible;
+        padding: 16px 0 0;
+      }
+      .form-panel  { height: auto; overflow: visible; }
+      .preview-panel { height: auto; overflow: visible; }
     }
 
     /* ============================================================
