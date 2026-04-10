@@ -338,6 +338,23 @@
     .btn-copy-image:hover { transform: translateY(-1px); box-shadow: 0 6px 28px var(--glow); filter: brightness(1.08); }
     .btn-copy-image:active { transform: none; }
     .btn-copy-image:disabled { opacity: 0.5; cursor: not-allowed; transform: none !important; filter: none; }
+    .btn-copy-imgmap {
+      background: linear-gradient(90deg, var(--a2), var(--a1), var(--a2));
+      background-size: 200% 100%;
+      background-position: 100% 0;
+      color: #fff;
+      border: none;
+      box-shadow: 0 4px 20px var(--glow), 0 0 0 2px rgba(255,255,255,0.12) inset;
+      animation: shimmer 3s ease-in-out infinite;
+    }
+    @keyframes shimmer {
+      0%   { background-position: 100% 0; }
+      50%  { background-position: 0% 0; }
+      100% { background-position: 100% 0; }
+    }
+    .btn-copy-imgmap:hover { transform: translateY(-1px); box-shadow: 0 6px 28px var(--glow), 0 0 0 2px rgba(255,255,255,0.2) inset; filter: brightness(1.1); }
+    .btn-copy-imgmap:active { transform: none; filter: brightness(0.92); animation: none; }
+    .btn-copy-imgmap:disabled { opacity: 0.5; cursor: not-allowed; animation: none; }
 
     /* ── Code block (kept for reference, element removed from DOM) ── */
     .code-body {
@@ -397,7 +414,7 @@
     <div class="header-icon" id="headerIcon">✉</div>
     <div>
       <h1>Email 簽名檔產生器</h1>
-      <p>即時編輯呈現資訊 · 一鍵複製 HTML（Outlook / Gmail / Apple Mail）· 下載圖片（HCL Notes）</p>
+      <p>即時編輯呈現資訊 · 一鍵複製 HTML · 下載圖片含連結，相容各類郵件客戶端</p>
     </div>
     <a href="https://github.com/bryanHsiao/email-signature-generator" target="_blank" class="github-link" title="GitHub Repo">
       <svg height="18" viewBox="0 0 16 16" width="18" fill="currentColor" aria-hidden="true"><path d="M8 0C3.58 0 0 3.58 0 8c0 3.54 2.29 6.53 5.47 7.59.4.07.55-.17.55-.38 0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82.64-.18 1.32-.27 2-.27.68 0 1.36.09 2 .27 1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48 0 1.07-.01 1.93-.01 2.2 0 .21.15.46.55.38A8.013 8.013 0 0016 8c0-4.42-3.58-8-8-8z"/></svg>
@@ -497,7 +514,7 @@
           <div class="email-divider"></div>
           <div class="edit-hint"><span class="edit-hint-text">✏️ 點擊簽名中的任意文字即可直接編輯</span></div>
           <div style="font-size:11px;color:#888;padding:4px 8px 2px 8px;line-height:1.6;">
-            💡 <b>HCL Notes</b> 建議使用「🖼 下載圖片」，在簽名設定中插入圖片檔案｜<b>Outlook / Gmail</b> 使用「複製 HTML」貼入簽名設定
+            💡 「🗺 圖片含連結」可用於各類郵件客戶端，含可點擊的 email 與網址｜純圖片用「🖼 下載圖片」｜「複製 HTML」適用 Outlook / Gmail 原生簽名設定
           </div>
           <div id="signaturePreview"></div>
         </div>
@@ -507,6 +524,9 @@
       <div class="copy-row">
         <button class="btn-copy btn-copy-image" id="downloadImgBtn">
           🖼 下載圖片
+        </button>
+        <button class="btn-copy btn-copy-imgmap" id="downloadImgMapBtn">
+          🗺 圖片含連結
         </button>
         <button class="btn-copy btn-copy-html" id="copyHtmlBtn">
           <span>⊞</span> 複製 HTML
@@ -550,8 +570,8 @@ const state = {
   logoHeight: 43,
   scheme:    'blue',
   nameColor:    '#1a1a2e',
-  nameFontEn:   'default',
-  nameFontZh:   'default',
+  nameFontEn:   'pacifico',
+  nameFontZh:   'jhenghei',
   showDots:     true,
   labelTieLine: '公司電話',
   labelMobile:  '行動電話',
@@ -1117,6 +1137,37 @@ ${signatureHTML}
 /* ================================================================
    DOWNLOAD PNG IMAGE
    ================================================================ */
+
+/* ── 共用：用預覽 DOM 元素推算 image map 座標 ── */
+function buildImageMap(target, scale) {
+  const base = target.getBoundingClientRect();
+
+  function coords(el) {
+    if (!el) return null;
+    const r = el.getBoundingClientRect();
+    return [
+      Math.floor((r.left   - base.left) * scale),
+      Math.floor((r.top    - base.top)  * scale),
+      Math.ceil ((r.right  - base.left) * scale),
+      Math.ceil ((r.bottom - base.top)  * scale),
+    ].join(',');
+  }
+
+  const areas = [];
+  const emailEl   = target.querySelector('[data-field="email"]');
+  const websiteEl = target.querySelector('[data-field="website"]');
+
+  if (emailEl && state.email) {
+    const c = coords(emailEl);
+    if (c) areas.push(`<area shape="rect" coords="${c}" href="mailto:${state.email}" alt="Email">`);
+  }
+  if (websiteEl && state.website) {
+    const c = coords(websiteEl);
+    if (c) areas.push(`<area shape="rect" coords="${c}" href="${state.website}" target="_blank" alt="Website">`);
+  }
+  return areas;
+}
+
 document.getElementById('downloadImgBtn').addEventListener('click', async () => {
   const btn = document.getElementById('downloadImgBtn');
   const target = document.getElementById('signaturePreview');
@@ -1151,15 +1202,83 @@ document.getElementById('downloadImgBtn').addEventListener('click', async () => 
 });
 
 /* ================================================================
+   DOWNLOAD IMAGE WITH IMAGE MAP (HTML)
+   ================================================================ */
+document.getElementById('downloadImgMapBtn').addEventListener('click', async () => {
+  const btn    = document.getElementById('downloadImgMapBtn');
+  const target = document.getElementById('signaturePreview');
+
+  btn.disabled = true;
+  btn.textContent = '處理中…';
+
+  try {
+    const targetWidth = 1142;
+    const scale = targetWidth / target.offsetWidth;
+
+    // 在 canvas 前先算好座標（DOM 還未被 html2canvas 動過）
+    const areas = buildImageMap(target, scale);
+
+    const canvas = await html2canvas(target, {
+      backgroundColor: '#ffffff',
+      scale: scale,
+      useCORS: true,
+      logging: false,
+    });
+
+    const imgH   = canvas.height;
+    const base64 = canvas.toDataURL('image/png');
+
+    const mapHtml = areas.length
+      ? `<map name="sigmap">\n  ${areas.join('\n  ')}\n</map>`
+      : '';
+    const useMap  = areas.length ? ' usemap="#sigmap"' : '';
+
+    const fullHtml = `<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+  <meta charset="UTF-8">
+  <title>Email Signature</title>
+</head>
+<body style="margin:0;padding:0;">
+<img src="${base64}"${useMap} width="${targetWidth}" height="${imgH}" style="display:block;border:0;" alt="Email Signature">
+${mapHtml}
+</body>
+</html>`;
+
+    const blob = new Blob([fullHtml], { type: 'text/html;charset=utf-8' });
+    const url  = URL.createObjectURL(blob);
+    const a    = Object.assign(document.createElement('a'), {
+      href: url, download: 'signature-linked.html'
+    });
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    URL.revokeObjectURL(url);
+    showToast(`signature-linked.html 已下載（含 ${areas.length} 個連結）`);
+  } catch (err) {
+    showToast('⚠ 截圖失敗，請確認 Logo 圖片來源是否允許跨域');
+    console.error('image map error:', err);
+  } finally {
+    btn.disabled = false;
+    btn.innerHTML = '🗺 圖片含連結';
+  }
+});
+
+/* ================================================================
    INIT
    ================================================================ */
 (function init() {
   renderSchemes();
   applyScheme(state.scheme);
+  loadGoogleFont(state.nameFontEn); // 預載預設英文字體
   renderFontBtns();
   bindFormInputs();
   bindLogoUpload();
   updatePreview();
+  // 字體非同步載入，完成後再刷新一次預覽
+  if (document.fonts && document.fonts.ready) {
+    document.fonts.ready.then(() => updatePreview());
+  }
 })();
 </script>
 </body>
