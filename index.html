@@ -1081,10 +1081,10 @@ function copyText(text, msg) {
 }
 
 document.getElementById('copyHtmlBtn').addEventListener('click', () =>
-  copyText(generateSignatureHTML(), '✓ HTML 已複製！請貼到 Email 簽名設定'));
+  copyText(generateSignatureHTML(), 'HTML 已複製！請貼到 Email 簽名設定'));
 
 document.getElementById('copyTextBtn').addEventListener('click', () =>
-  copyText(generatePlainText(), '✓ 純文字已複製！'));
+  copyText(generatePlainText(), '純文字已複製！'));
 
 /* ================================================================
    DOWNLOAD HTML FILE
@@ -1111,7 +1111,7 @@ ${signatureHTML}
   a.click();
   document.body.removeChild(a);
   URL.revokeObjectURL(url);
-  showToast('✓ signature.html 已下載！');
+  showToast('signature.html 已下載！');
 });
 
 /* ================================================================
@@ -1140,7 +1140,7 @@ document.getElementById('downloadImgBtn').addEventListener('click', async () => 
     document.body.appendChild(a);
     a.click();
     document.body.removeChild(a);
-    showToast('✓ signature.png 已下載！');
+    showToast('signature.png 已下載！');
   } catch (err) {
     showToast('⚠ 截圖失敗，請確認 Logo 圖片來源是否允許跨域');
     console.error('html2canvas error:', err);
