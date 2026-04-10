@@ -504,10 +504,10 @@ const state = {
   nameZh:    '蕭恩政',
   companyEn: 'ChunTai Tech Industrial Co.,Ltd',
   companyZh: '崇太科技實業有限公司',
-  tieLine:   '886-2-2558-1229 # 231',
+  tieLine:   '02-2558-1229',
   mobile:    '0928-662-718',
   email:     'bryanhsiao@domino.com.tw',
-  website:   'http://www.domino.com.tw',
+  website:   'https://www.domino.com.tw',
   address:   '台北市長安西路180號10樓之一',
   location:  'Taipei Taiwan',
   logoSrc:    null,   // null = 使用預設 PNG logo
@@ -515,9 +515,9 @@ const state = {
   logoHeight: 75,
   scheme:    'blue',
   nameColor: '#1a1a2e',
-  labelTieLine: 'Tie-Line',
-  labelMobile:  'Outside',
-  labelEmail:   'Email',
+  labelTieLine: '公司電話',
+  labelMobile:  '行動電話',
+  labelEmail:   '電子郵件',
   labelMailing: 'Mailing',
 };
 
@@ -649,7 +649,7 @@ function generateSignatureHTML(forPreview = false) {
 
   // ── Footer line: address + website + location ──
   const footerParts = [];
-  if (address) footerParts.push(`— ${ed('labelMailing', labelMailing)}：${ed('address', address)}`);
+  if (address) footerParts.push(`${ed('labelMailing', labelMailing)}：${ed('address', address)}`);
   if (website) footerParts.push(
     forPreview
       ? ed('website', website, `color:${primary};`)
@@ -657,7 +657,7 @@ function generateSignatureHTML(forPreview = false) {
   );
   if (location) footerParts.push(ed('location', location));
   const footerHTML = footerParts.length
-    ? `<p style="margin:6px 0 0 0;padding:0;font-size:11px;color:#888888;font-family:Arial,Helvetica,sans-serif;line-height:1.5;">${footerParts.join('&nbsp;&nbsp;')}</p>`
+    ? `<p style="margin:0 0 4px 0;padding:0;font-size:12px;color:#333333;font-family:Arial,Helvetica,sans-serif;line-height:1.4;">${footerParts.join('&nbsp;&nbsp;')}</p>`
     : '';
 
   return `<!-- Email Signature — ChunTai Tech / 崇太科技 -->
