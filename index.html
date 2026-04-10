@@ -251,6 +251,17 @@
       height: 1px; background: #ddd; margin-bottom: 18px;
     }
     #signaturePreview { display: block; }
+    /* ── Inline editable labels in preview ── */
+    .editable-label:hover {
+      border-bottom-color: rgba(0,0,0,0.55) !important;
+      background: rgba(0,102,255,0.06);
+      border-radius: 2px;
+    }
+    .editable-label:focus {
+      border-bottom-color: #0066ff !important;
+      background: rgba(0,102,255,0.08);
+      border-radius: 2px;
+    }
 
     /* ── Copy buttons ── */
     .copy-row { display: flex; gap: 12px; }
@@ -434,24 +445,12 @@
       <div class="card">
         <div class="card-title">聯絡方式</div>
         <div class="field">
-          <label>內線電話標題</label>
-          <input type="text" id="labelTieLine" value="Tie-Line" placeholder="e.g. Tie-Line / Tel">
-        </div>
-        <div class="field">
           <label>內線電話</label>
           <input type="text" id="tieLine" value="886-2-2558-1229 # 231" placeholder="886-2-XXXX-XXXX # XXX">
         </div>
         <div class="field">
-          <label>手機標題</label>
-          <input type="text" id="labelMobile" value="Outside" placeholder="e.g. Outside / Mobile">
-        </div>
-        <div class="field">
           <label>手機號碼</label>
           <input type="text" id="mobile" value="0928-662-718" placeholder="0900-000-000">
-        </div>
-        <div class="field">
-          <label>Email 標題</label>
-          <input type="text" id="labelEmail" value="Email" placeholder="e.g. Email / E-mail">
         </div>
         <div class="field">
           <label>Email</label>
@@ -460,10 +459,6 @@
         <div class="field">
           <label>公司網站</label>
           <input type="url" id="website" value="http://www.domino.com.tw">
-        </div>
-        <div class="field">
-          <label>地址標題</label>
-          <input type="text" id="labelMailing" value="Mailing" placeholder="e.g. Mailing / Address">
         </div>
         <div class="field">
           <label>郵寄地址</label>
@@ -659,7 +654,7 @@ function esc(v) {
    ── Flat structure: single outer table, <p> tags for content
    ── No nested tables → consistent rendering in all email clients
    ================================================================ */
-function generateSignatureHTML() {
+function generateSignatureHTML(forPreview = false) {
   const { nameEn, nameZh, companyEn, companyZh,
           tieLine, mobile, email, website, address, location,
           labelTieLine, labelMobile, labelEmail, labelMailing } = state;
@@ -668,21 +663,28 @@ function generateSignatureHTML() {
   const logoW = state.logoWidth;
   const logoH = state.logoHeight;
 
+  // ── Editable label helper ──
+  // forPreview: wrap in contenteditable span so user can click & edit inline
+  // forEmail:   plain escaped text
+  const lbl = (field, text) => forPreview
+    ? `<span contenteditable="true" data-field="${field}" class="editable-label" style="outline:none;cursor:text;border-bottom:1px dashed rgba(0,0,0,0.25);display:inline-block;">${esc(text)}</span>`
+    : esc(text);
+
   // ── Contact rows ──
   const contactLines = [];
   if (tieLine) contactLines.push(
-    `<p style="margin:0 0 4px 0;padding:0;font-size:12px;color:#333333;font-family:Arial,Helvetica,sans-serif;line-height:1.4;">${esc(labelTieLine)}：${esc(tieLine)}</p>`
+    `<p style="margin:0 0 4px 0;padding:0;font-size:12px;color:#333333;font-family:Arial,Helvetica,sans-serif;line-height:1.4;">${lbl('labelTieLine', labelTieLine)}：${esc(tieLine)}</p>`
   );
   if (mobile) contactLines.push(
-    `<p style="margin:0 0 4px 0;padding:0;font-size:12px;color:#333333;font-family:Arial,Helvetica,sans-serif;line-height:1.4;">${esc(labelMobile)}：${esc(mobile)}</p>`
+    `<p style="margin:0 0 4px 0;padding:0;font-size:12px;color:#333333;font-family:Arial,Helvetica,sans-serif;line-height:1.4;">${lbl('labelMobile', labelMobile)}：${esc(mobile)}</p>`
   );
   if (email) contactLines.push(
-    `<p style="margin:0 0 4px 0;padding:0;font-size:12px;color:#333333;font-family:Arial,Helvetica,sans-serif;line-height:1.4;">${esc(labelEmail)}：<a href="mailto:${esc(email)}" style="color:${primary};text-decoration:none;">${esc(email)}</a></p>`
+    `<p style="margin:0 0 4px 0;padding:0;font-size:12px;color:#333333;font-family:Arial,Helvetica,sans-serif;line-height:1.4;">${lbl('labelEmail', labelEmail)}：<a href="mailto:${esc(email)}" style="color:${primary};text-decoration:none;">${esc(email)}</a></p>`
   );
 
   // ── Footer line: address + website + location ──
   const footerParts = [];
-  if (address) footerParts.push(`— ${esc(labelMailing)}：${esc(address)}`);
+  if (address) footerParts.push(`— ${lbl('labelMailing', labelMailing)}：${esc(address)}`);
   if (website) footerParts.push(
     `<a href="${esc(website)}" target="_blank" style="color:${primary};text-decoration:none;">${esc(website)}</a>`
   );
@@ -799,10 +801,27 @@ function renderSchemes() {
    UPDATE PREVIEW
    ================================================================ */
 function updatePreview() {
-  const html = generateSignatureHTML();
-  document.getElementById('signaturePreview').innerHTML = html;
-  document.getElementById('codePreview').textContent = html;
+  const emailHtml = generateSignatureHTML(false);
+  document.getElementById('signaturePreview').innerHTML = generateSignatureHTML(true);
+  document.getElementById('codePreview').textContent = emailHtml;
   document.getElementById('logoThumb').src = getLogoSrc();
+
+  // ── Bind inline editable labels ──
+  document.querySelectorAll('#signaturePreview .editable-label').forEach(span => {
+    span.addEventListener('blur', () => {
+      const field = span.dataset.field;
+      const val = span.textContent.trim() || span.textContent;
+      if (state[field] !== val) {
+        state[field] = val;
+        // 只更新 code panel，不重繪 preview（避免搶走 focus）
+        document.getElementById('codePreview').textContent = generateSignatureHTML(false);
+      }
+    });
+    // 防止 Enter 換行
+    span.addEventListener('keydown', e => {
+      if (e.key === 'Enter') { e.preventDefault(); span.blur(); }
+    });
+  });
 }
 
 /* ================================================================
@@ -838,7 +857,7 @@ function selectScheme(key) {
 }
 
 function bindFormInputs() {
-  ['nameEn','nameZh','companyEn','companyZh','tieLine','mobile','email','website','address','location','labelTieLine','labelMobile','labelEmail','labelMailing']
+  ['nameEn','nameZh','companyEn','companyZh','tieLine','mobile','email','website','address','location']
     .forEach(id => {
       const el = document.getElementById(id);
       if (el) el.addEventListener('input', () => { state[id] = el.value; updatePreview(); });
