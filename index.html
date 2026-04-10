@@ -1,0 +1,858 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Email 簽名檔產生器</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Sans:opsz,wght@9..40,300;9..40,400;9..40,500;9..40,600&display=swap" rel="stylesheet">
+  <style>
+    /* ============================================================
+       CSS VARIABLES & RESET
+       ============================================================ */
+    :root {
+      --bg:        #08080f;
+      --bg-card:   rgba(255,255,255,0.04);
+      --bg-input:  rgba(255,255,255,0.06);
+      --border:    rgba(255,255,255,0.08);
+      --border-hi: rgba(255,255,255,0.18);
+      --text:      #eeeef8;
+      --text-sub:  #8888aa;
+      --text-muted:#3d3d55;
+      --a1: #0066ff;
+      --a2: #00c6ff;
+      --glow: rgba(0,102,255,0.22);
+      --radius: 14px;
+    }
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    html { scroll-behavior: smooth; }
+    body {
+      font-family: 'DM Sans', -apple-system, BlinkMacSystemFont, sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      min-height: 100vh;
+      overflow-x: hidden;
+    }
+
+    /* ── Background grid ── */
+    body::before {
+      content: '';
+      position: fixed; inset: 0; z-index: 0; pointer-events: none;
+      background-image:
+        linear-gradient(rgba(255,255,255,0.018) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(255,255,255,0.018) 1px, transparent 1px);
+      background-size: 48px 48px;
+    }
+    /* ── Top glow orb ── */
+    body::after {
+      content: '';
+      position: fixed; top: -220px; left: 50%; transform: translateX(-50%);
+      width: 900px; height: 440px;
+      background: radial-gradient(ellipse at center, var(--glow) 0%, transparent 68%);
+      pointer-events: none; z-index: 0;
+      transition: background 0.6s ease;
+    }
+
+    /* ============================================================
+       APP WRAPPER
+       ============================================================ */
+    .app {
+      position: relative; z-index: 1;
+      max-width: 1380px; margin: 0 auto;
+      padding: 0 28px 72px;
+    }
+
+    /* ============================================================
+       HEADER
+       ============================================================ */
+    .header {
+      padding: 36px 0 28px;
+      display: flex; align-items: center; gap: 14px;
+      border-bottom: 1px solid var(--border);
+      margin-bottom: 30px;
+    }
+    .header-icon {
+      width: 46px; height: 46px; border-radius: 13px; flex-shrink: 0;
+      background: linear-gradient(135deg, var(--a1), var(--a2));
+      display: flex; align-items: center; justify-content: center;
+      font-size: 22px; box-shadow: 0 0 24px var(--glow);
+      transition: background 0.5s, box-shadow 0.5s;
+    }
+    .header h1 {
+      font-family: 'Syne', sans-serif; font-size: 21px; font-weight: 800;
+      letter-spacing: -0.025em; line-height: 1;
+      background: linear-gradient(120deg, #ffffff 30%, var(--a2) 100%);
+      -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+      background-clip: text;
+      transition: all 0.5s;
+    }
+    .header p { font-size: 12.5px; color: var(--text-sub); margin-top: 4px; }
+
+    /* ============================================================
+       SPLIT LAYOUT
+       ============================================================ */
+    .split {
+      display: grid;
+      grid-template-columns: 360px 1fr;
+      gap: 24px; align-items: start;
+    }
+    @media (max-width: 860px) {
+      .split { grid-template-columns: 1fr; }
+      .form-panel { position: static !important; }
+    }
+
+    /* ============================================================
+       FORM PANEL
+       ============================================================ */
+    .form-panel {
+      position: sticky; top: 20px;
+      max-height: calc(100vh - 40px); overflow-y: auto;
+      padding-right: 4px;
+      scrollbar-width: thin; scrollbar-color: rgba(255,255,255,0.08) transparent;
+    }
+    .form-panel::-webkit-scrollbar { width: 5px; }
+    .form-panel::-webkit-scrollbar-track { background: transparent; }
+    .form-panel::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.1); border-radius: 3px; }
+
+    .card {
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 18px 18px;
+      margin-bottom: 14px;
+      backdrop-filter: blur(12px);
+      transition: border-color 0.25s;
+    }
+    .card:hover { border-color: rgba(255,255,255,0.12); }
+    .card:last-child { margin-bottom: 0; }
+
+    .card-title {
+      font-family: 'Syne', sans-serif;
+      font-size: 10.5px; font-weight: 700;
+      letter-spacing: 0.14em; text-transform: uppercase;
+      color: var(--text-sub); margin-bottom: 14px;
+      display: flex; align-items: center; gap: 8px;
+    }
+    .card-title::after {
+      content: ''; flex: 1; height: 1px; background: var(--border);
+    }
+
+    /* ── Scheme selector ── */
+    .schemes { display: grid; grid-template-columns: repeat(4,1fr); gap: 8px; }
+    .scheme-btn {
+      border: 2px solid transparent; border-radius: 10px;
+      padding: 10px 4px 8px; cursor: pointer;
+      background: var(--bg-input);
+      display: flex; flex-direction: column; align-items: center; gap: 6px;
+      transition: all 0.2s;
+    }
+    .scheme-btn:hover { background: rgba(255,255,255,0.09); transform: translateY(-1px); }
+    .scheme-btn.active { border-color: var(--a1); background: rgba(0,102,255,0.08); }
+    .scheme-swatch {
+      width: 26px; height: 26px; border-radius: 50%;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.4);
+    }
+    .scheme-label { font-size: 10px; color: var(--text-sub); text-align: center; line-height: 1.3; }
+    .scheme-btn.active .scheme-label { color: var(--text); }
+
+    /* ── Fields ── */
+    .field { margin-bottom: 10px; }
+    .field:last-child { margin-bottom: 0; }
+    .field label {
+      display: block; font-size: 11px; font-weight: 500;
+      color: var(--text-sub); margin-bottom: 5px; letter-spacing: 0.02em;
+    }
+    .field input {
+      width: 100%; padding: 8px 11px;
+      background: var(--bg-input);
+      border: 1px solid var(--border); border-radius: 8px;
+      color: var(--text); font-family: 'DM Sans', sans-serif; font-size: 13px;
+      outline: none; -webkit-appearance: none;
+      transition: border-color 0.2s, box-shadow 0.2s, background 0.2s;
+    }
+    .field input:focus {
+      border-color: var(--a1);
+      background: rgba(255,255,255,0.08);
+      box-shadow: 0 0 0 3px var(--glow);
+    }
+    .field input::placeholder { color: var(--text-muted); }
+
+    /* ── Logo area ── */
+    .logo-area { display: flex; gap: 12px; align-items: center; }
+    .logo-thumb {
+      width: 60px; height: 60px; border-radius: 11px; flex-shrink: 0;
+      border: 1px solid var(--border); background: rgba(255,255,255,0.05);
+      display: flex; align-items: center; justify-content: center; overflow: hidden;
+    }
+    .logo-thumb img { width: 100%; height: 100%; object-fit: contain; display: block; }
+    .logo-btns { display: flex; flex-direction: column; gap: 6px; flex: 1; }
+    .btn-sm {
+      padding: 7px 11px; border-radius: 7px;
+      font-family: 'DM Sans', sans-serif; font-size: 11.5px; font-weight: 500;
+      cursor: pointer; border: 1px solid var(--border);
+      background: var(--bg-input); color: var(--text-sub);
+      text-align: center; transition: all 0.2s;
+    }
+    .btn-sm:hover { color: var(--text); border-color: var(--border-hi); background: rgba(255,255,255,0.08); }
+    #logoFileInput { display: none; }
+
+    /* ============================================================
+       PREVIEW PANEL
+       ============================================================ */
+    .preview-panel { display: flex; flex-direction: column; gap: 16px; }
+
+    /* ── Email mockup ── */
+    .email-mockup {
+      background: var(--bg-card);
+      border: 1px solid var(--border); border-radius: var(--radius);
+      overflow: hidden; backdrop-filter: blur(12px);
+    }
+    .email-titlebar {
+      padding: 11px 16px; border-bottom: 1px solid var(--border);
+      display: flex; align-items: center; gap: 10px;
+    }
+    .dot-group { display: flex; gap: 5px; }
+    .dot { width: 10px; height: 10px; border-radius: 50%; }
+    .dot-r { background: #ff5f57; }
+    .dot-y { background: #ffbd2e; }
+    .dot-g { background: #28c840; }
+    .email-titlebar-label {
+      flex: 1; text-align: center;
+      font-size: 11px; color: var(--text-muted); font-weight: 500;
+    }
+    .email-meta {
+      padding: 12px 20px;
+      border-bottom: 1px solid var(--border);
+      display: flex; flex-direction: column; gap: 5px;
+    }
+    .email-meta-row {
+      display: flex; gap: 8px; font-size: 11.5px; color: var(--text-sub);
+    }
+    .email-meta-row strong { color: var(--text-muted); font-weight: 600; min-width: 42px; }
+    .email-body {
+      padding: 20px 24px;
+      background: #f4f4ef;
+      font-family: Arial, Helvetica, sans-serif; font-size: 13px;
+      color: #333; line-height: 1.6;
+    }
+    .email-body-text { margin-bottom: 18px; color: #555; }
+    .email-divider {
+      height: 1px; background: #ddd; margin-bottom: 18px;
+    }
+    #signaturePreview { display: block; }
+
+    /* ── Copy buttons ── */
+    .copy-row { display: flex; gap: 12px; }
+    .btn-copy {
+      flex: 1; padding: 13px 18px; border-radius: 11px; border: none;
+      font-family: 'Syne', sans-serif; font-size: 13.5px; font-weight: 700;
+      letter-spacing: 0.02em; cursor: pointer;
+      display: flex; align-items: center; justify-content: center; gap: 8px;
+      transition: all 0.2s;
+    }
+    .btn-copy-html {
+      background: linear-gradient(135deg, var(--a1), var(--a2));
+      color: #fff; box-shadow: 0 4px 20px var(--glow);
+    }
+    .btn-copy-html:hover { transform: translateY(-1px); box-shadow: 0 6px 28px var(--glow); filter: brightness(1.08); }
+    .btn-copy-html:active { transform: none; }
+    .btn-copy-text {
+      background: var(--bg-card); color: var(--text-sub);
+      border: 1px solid var(--border);
+    }
+    .btn-copy-text:hover { color: var(--text); border-color: var(--border-hi); background: rgba(255,255,255,0.07); }
+    .btn-copy-download {
+      background: var(--bg-card); color: var(--text-sub);
+      border: 1px solid var(--border);
+    }
+    .btn-copy-download:hover { color: var(--a2); border-color: var(--a1); background: rgba(255,255,255,0.06); }
+
+    /* ── Code block ── */
+    .code-card {
+      background: var(--bg-card); border: 1px solid var(--border);
+      border-radius: var(--radius); overflow: hidden; backdrop-filter: blur(12px);
+    }
+    .code-header {
+      padding: 11px 16px; border-bottom: 1px solid var(--border);
+      display: flex; align-items: center; justify-content: space-between;
+    }
+    .code-header-label {
+      font-family: 'Syne', sans-serif; font-size: 10.5px; font-weight: 700;
+      letter-spacing: 0.12em; text-transform: uppercase; color: var(--text-sub);
+      display: flex; align-items: center; gap: 7px;
+    }
+    .code-header-label::before {
+      content: ''; width: 8px; height: 8px; border-radius: 50%;
+      background: linear-gradient(135deg, var(--a1), var(--a2)); flex-shrink: 0;
+    }
+    .code-body {
+      padding: 14px 16px; max-height: 140px; overflow: auto;
+      font-family: 'Courier New', Courier, monospace; font-size: 10.5px;
+      color: #5c6370; line-height: 1.55; word-break: break-all; white-space: pre-wrap;
+      scrollbar-width: thin; scrollbar-color: rgba(255,255,255,0.08) transparent;
+    }
+
+    /* ============================================================
+       TOAST
+       ============================================================ */
+    .toast {
+      position: fixed; bottom: 28px; left: 50%;
+      transform: translateX(-50%) translateY(110px);
+      background: rgba(8,8,20,0.96); border: 1px solid var(--a1);
+      color: var(--text); padding: 11px 26px; border-radius: 100px;
+      font-size: 13px; font-weight: 500;
+      display: flex; align-items: center; gap: 8px;
+      z-index: 9999; white-space: nowrap;
+      box-shadow: 0 4px 32px var(--glow);
+      transition: transform 0.38s cubic-bezier(0.34,1.56,0.64,1), border-color 0.5s, box-shadow 0.5s;
+    }
+    .toast.show { transform: translateX(-50%) translateY(0); }
+    .toast-check { font-size: 15px; }
+
+    /* ============================================================
+       ANIMATIONS
+       ============================================================ */
+    @keyframes fadeUp {
+      from { opacity: 0; transform: translateY(18px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+    .card { animation: fadeUp 0.45s ease backwards; }
+    .card:nth-child(1) { animation-delay: 0.04s; }
+    .card:nth-child(2) { animation-delay: 0.10s; }
+    .card:nth-child(3) { animation-delay: 0.16s; }
+    .card:nth-child(4) { animation-delay: 0.22s; }
+    .card:nth-child(5) { animation-delay: 0.28s; }
+    .email-mockup { animation: fadeUp 0.45s 0.08s ease backwards; }
+    .copy-row     { animation: fadeUp 0.45s 0.14s ease backwards; }
+    .code-card    { animation: fadeUp 0.45s 0.20s ease backwards; }
+
+    /* ============================================================
+       SCROLLBAR GLOBAL
+       ============================================================ */
+    ::-webkit-scrollbar { width: 5px; height: 5px; }
+    ::-webkit-scrollbar-track { background: transparent; }
+    ::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.1); border-radius: 3px; }
+  </style>
+</head>
+<body>
+<div class="app">
+
+  <!-- ── Header ── -->
+  <header class="header">
+    <div class="header-icon" id="headerIcon">✉</div>
+    <div>
+      <h1>Email 簽名檔產生器</h1>
+      <p>填寫資訊 · 即時預覽 · 一鍵複製 HTML，相容 Outlook / Gmail / Apple Mail</p>
+    </div>
+  </header>
+
+  <!-- ── Split layout ── -->
+  <div class="split">
+
+    <!-- ════════════════════════════
+         LEFT: FORM PANEL
+         ════════════════════════════ -->
+    <aside class="form-panel">
+
+      <!-- 配色方案 -->
+      <div class="card">
+        <div class="card-title">配色方案</div>
+        <div class="schemes" id="schemesGrid"></div>
+      </div>
+
+      <!-- Logo -->
+      <div class="card">
+        <div class="card-title">公司 Logo</div>
+        <div class="logo-area">
+          <div class="logo-thumb">
+            <img id="logoThumb" src="" alt="Logo Preview">
+          </div>
+          <div class="logo-btns">
+            <label for="logoFileInput" class="btn-sm" style="cursor:pointer;">⬆ 上傳圖片</label>
+            <input type="file" id="logoFileInput" accept="image/*">
+            <button class="btn-sm" id="resetLogoBtn">↺ 使用預設 Logo</button>
+          </div>
+        </div>
+        <div class="field" style="margin-top:12px;">
+          <label>Logo 圖片網址（選填）</label>
+          <input type="url" id="logoUrl" placeholder="https://example.com/logo.png">
+        </div>
+      </div>
+
+      <!-- 個人資訊 -->
+      <div class="card">
+        <div class="card-title">個人資訊</div>
+        <div class="field">
+          <label>英文姓名</label>
+          <input type="text" id="nameEn" value="Bryan Hsiao" placeholder="English Name">
+        </div>
+        <div class="field">
+          <label>中文姓名</label>
+          <input type="text" id="nameZh" value="蕭恩政" placeholder="中文姓名">
+        </div>
+      </div>
+
+      <!-- 公司資訊 -->
+      <div class="card">
+        <div class="card-title">公司資訊</div>
+        <div class="field">
+          <label>公司英文名稱</label>
+          <input type="text" id="companyEn" value="ChunTai Tech Industrial Co.,Ltd">
+        </div>
+        <div class="field">
+          <label>公司中文名稱</label>
+          <input type="text" id="companyZh" value="崇太科技實業有限公司">
+        </div>
+      </div>
+
+      <!-- 聯絡方式 -->
+      <div class="card">
+        <div class="card-title">聯絡方式</div>
+        <div class="field">
+          <label>Tie-Line（內線電話）</label>
+          <input type="text" id="tieLine" value="886-2-2558-1229 # 231" placeholder="886-2-XXXX-XXXX # XXX">
+        </div>
+        <div class="field">
+          <label>Outside（手機）</label>
+          <input type="text" id="mobile" value="0928-662-718" placeholder="0900-000-000">
+        </div>
+        <div class="field">
+          <label>Email</label>
+          <input type="email" id="email" value="bryanhsiao@domino.com.tw">
+        </div>
+        <div class="field">
+          <label>公司網站</label>
+          <input type="url" id="website" value="http://www.domino.com.tw">
+        </div>
+        <div class="field">
+          <label>郵寄地址</label>
+          <input type="text" id="address" value="台北市長安西路180號10樓之一">
+        </div>
+        <div class="field">
+          <label>地區</label>
+          <input type="text" id="location" value="Taipei Taiwan" placeholder="City Country">
+        </div>
+      </div>
+
+    </aside><!-- /form-panel -->
+
+    <!-- ════════════════════════════
+         RIGHT: PREVIEW PANEL
+         ════════════════════════════ -->
+    <section class="preview-panel">
+
+      <!-- Email mockup -->
+      <div class="email-mockup">
+        <div class="email-titlebar">
+          <div class="dot-group">
+            <div class="dot dot-r"></div>
+            <div class="dot dot-y"></div>
+            <div class="dot dot-g"></div>
+          </div>
+          <div class="email-titlebar-label">簽名預覽</div>
+          <div style="width:52px"></div>
+        </div>
+        <div class="email-meta">
+          <div class="email-meta-row"><strong>寄件者</strong> Bryan Hsiao &lt;bryanhsiao@domino.com.tw&gt;</div>
+          <div class="email-meta-row"><strong>主旨</strong> Re: 報價單確認 &mdash; 崇太科技</div>
+        </div>
+        <div class="email-body">
+          <div class="email-body-text">Hi，附上相關資料，如有任何問題請不吝告知，謝謝。</div>
+          <div class="email-divider"></div>
+          <div id="signaturePreview"></div>
+        </div>
+      </div>
+
+      <!-- Copy / Download buttons -->
+      <div class="copy-row">
+        <button class="btn-copy btn-copy-html" id="copyHtmlBtn">
+          <span>⊞</span> 複製 HTML
+        </button>
+        <button class="btn-copy btn-copy-text" id="copyTextBtn">
+          <span>≡</span> 複製純文字
+        </button>
+        <button class="btn-copy btn-copy-download" id="downloadHtmlBtn">
+          <span>⬇</span> 下載 HTML
+        </button>
+      </div>
+
+      <!-- HTML source preview -->
+      <div class="code-card">
+        <div class="code-header">
+          <div class="code-header-label">HTML 原始碼</div>
+        </div>
+        <div class="code-body" id="codePreview"></div>
+      </div>
+
+    </section><!-- /preview-panel -->
+
+  </div><!-- /split -->
+</div><!-- /app -->
+
+<!-- Toast -->
+<div class="toast" id="toast">
+  <span class="toast-check">✓</span>
+  <span id="toastMsg">已複製到剪貼簿！</span>
+</div>
+
+<script>
+/* ================================================================
+   STATE
+   ================================================================ */
+const state = {
+  nameEn:    'Bryan Hsiao',
+  nameZh:    '蕭恩政',
+  companyEn: 'ChunTai Tech Industrial Co.,Ltd',
+  companyZh: '崇太科技實業有限公司',
+  tieLine:   '886-2-2558-1229 # 231',
+  mobile:    '0928-662-718',
+  email:     'bryanhsiao@domino.com.tw',
+  website:   'http://www.domino.com.tw',
+  address:   '台北市長安西路180號10樓之一',
+  location:  'Taipei Taiwan',
+  logoSrc:   null,   // null = 使用預設 SVG logo
+  scheme:    'blue',
+};
+
+/* ================================================================
+   COLOR SCHEMES
+   ================================================================ */
+const SCHEMES = {
+  blue: {
+    name: '科技藍',
+    p: '#0066ff', s: '#00c6ff',
+    glow: 'rgba(0,102,255,0.22)',
+    rgb: '0,102,255',
+  },
+  orange: {
+    name: '活力橘',
+    p: '#ff6b35', s: '#ffaa00',
+    glow: 'rgba(255,107,53,0.22)',
+    rgb: '255,107,53',
+  },
+  purple: {
+    name: '優雅紫',
+    p: '#8b5cf6', s: '#ec4899',
+    glow: 'rgba(139,92,246,0.22)',
+    rgb: '139,92,246',
+  },
+  green: {
+    name: '清新綠',
+    p: '#10b981', s: '#06b6d4',
+    glow: 'rgba(16,185,129,0.22)',
+    rgb: '16,185,129',
+  },
+};
+
+/* ================================================================
+   DEFAULT LOGO (SVG → base64 data URI)
+   ================================================================ */
+function makeDefaultLogoURI(p, s) {
+  const svg = `<svg xmlns="http://www.w3.org/2000/svg" width="75" height="75" viewBox="0 0 75 75">
+  <defs>
+    <linearGradient id="g" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="${p}"/>
+      <stop offset="100%" stop-color="${s}"/>
+    </linearGradient>
+  </defs>
+  <rect width="75" height="75" rx="14" fill="url(#g)"/>
+  <rect x="7" y="7" width="61" height="61" rx="10" fill="none" stroke="rgba(255,255,255,0.18)" stroke-width="1"/>
+  <text x="37.5" y="27" text-anchor="middle" dominant-baseline="middle"
+        font-family="Arial,sans-serif" font-size="9.5" font-weight="700"
+        fill="rgba(255,255,255,0.65)" letter-spacing="1.5">CHUNTAI</text>
+  <text x="37.5" y="52" text-anchor="middle" dominant-baseline="middle"
+        font-family="Arial,sans-serif" font-size="24" font-weight="800" fill="#ffffff">CT</text>
+</svg>`;
+  return 'data:image/svg+xml;base64,' + btoa(svg);
+}
+
+function getLogoSrc() {
+  if (state.logoSrc) return state.logoSrc;
+  const sc = SCHEMES[state.scheme];
+  return makeDefaultLogoURI(sc.p, sc.s);
+}
+
+/* ================================================================
+   HTML ESCAPE
+   ================================================================ */
+function esc(v) {
+  return String(v)
+    .replace(/&/g,  '&amp;')
+    .replace(/</g,  '&lt;')
+    .replace(/>/g,  '&gt;')
+    .replace(/"/g,  '&quot;');
+}
+
+/* ================================================================
+   GENERATE SIGNATURE HTML (table layout + inline styles)
+   ── Email 相容：Outlook / Gmail / Apple Mail
+   ================================================================ */
+function generateSignatureHTML() {
+  const { nameEn, nameZh, companyEn, companyZh,
+          tieLine, mobile, email, website, address, location } = state;
+  const { p: primary } = SCHEMES[state.scheme];
+  const logo = getLogoSrc();
+
+  // ── Contact rows ──
+  const contactRows = [
+    tieLine  && ['Tel',   esc(tieLine)],
+    mobile   && ['Mob',   esc(mobile)],
+    email    && ['Email', `<a href="mailto:${esc(email)}" style="color:${primary};text-decoration:none;">${esc(email)}</a>`],
+    website  && ['Web',   `<a href="${esc(website)}" target="_blank" style="color:${primary};text-decoration:none;">${esc(website.replace(/^https?:\/\//,''))}</a>`],
+    (address || location) && ['Add',  (address ? esc(address) : '') + (address && location ? '<br>' : '') + (location ? `<span style="color:#999999;">${esc(location)}</span>` : '')],
+  ].filter(Boolean);
+
+  const rowsHTML = contactRows.map(([label, val]) => `
+              <tr>
+                <td style="padding:1px 12px 1px 0;font-size:10px;color:#bbbbbb;font-family:Arial,Helvetica,sans-serif;white-space:nowrap;vertical-align:top;font-weight:700;letter-spacing:0.1em;text-transform:uppercase;">${label}</td>
+                <td style="padding:1px 0;font-size:11.5px;color:#333333;font-family:Arial,Helvetica,sans-serif;line-height:1.5;">${val}</td>
+              </tr>`).join('');
+
+  return `<!-- Email Signature — ChunTai Tech / 崇太科技 -->
+<table cellpadding="0" cellspacing="0" border="0" width="500" role="presentation"
+       style="border-collapse:collapse;font-family:Arial,Helvetica,sans-serif;width:500px;max-width:100%;">
+  <tbody>
+    <tr>
+
+      <!-- Logo -->
+      <td width="98" style="width:98px;padding:0 18px 0 0;vertical-align:middle;border-right:3px solid ${primary};">
+        <img src="${logo}" width="75" height="75" alt="${esc(companyZh)}"
+             style="display:block;border:0;outline:0;text-decoration:none;-ms-interpolation-mode:bicubic;border-radius:10px;">
+      </td>
+
+      <!-- Content -->
+      <td style="padding:6px 0 6px 18px;vertical-align:top;">
+        <table cellpadding="0" cellspacing="0" border="0" role="presentation">
+          <tbody>
+
+            <!-- Name -->
+            <tr>
+              <td style="padding-bottom:5px;white-space:nowrap;">
+                <span style="font-size:19px;font-weight:700;color:#1a1a2e;font-family:Arial,Helvetica,sans-serif;line-height:1;">${esc(nameEn)}</span>
+                <span style="font-size:12.5px;color:#888888;font-family:Arial,Helvetica,sans-serif;padding-left:10px;line-height:1;">${esc(nameZh)}</span>
+              </td>
+            </tr>
+
+            <!-- Accent divider -->
+            <tr>
+              <td style="padding-bottom:8px;">
+                <table cellpadding="0" cellspacing="0" border="0" role="presentation">
+                  <tbody>
+                    <tr>
+                      <td bgcolor="${primary}" width="200" height="2"
+                          style="background-color:${primary};height:2px;line-height:2px;font-size:0;"> </td>
+                    </tr>
+                  </tbody>
+                </table>
+              </td>
+            </tr>
+
+            <!-- Company -->
+            <tr>
+              <td style="padding-bottom:9px;">
+                <span style="font-size:12px;font-weight:700;color:${primary};font-family:Arial,Helvetica,sans-serif;display:block;line-height:1.45;">${esc(companyEn)}</span>
+                <span style="font-size:11px;color:#999999;font-family:Arial,Helvetica,sans-serif;display:block;line-height:1.45;">${esc(companyZh)}</span>
+              </td>
+            </tr>
+
+            <!-- Contact details -->
+            <tr>
+              <td>
+                <table cellpadding="0" cellspacing="0" border="0" role="presentation">
+                  <tbody>${rowsHTML}
+                  </tbody>
+                </table>
+              </td>
+            </tr>
+
+          </tbody>
+        </table>
+      </td><!-- /Content -->
+
+    </tr>
+  </tbody>
+</table>`;
+}
+
+/* ================================================================
+   GENERATE PLAIN TEXT
+   ================================================================ */
+function generatePlainText() {
+  const { nameEn, nameZh, companyEn, companyZh,
+          tieLine, mobile, email, website, address, location } = state;
+  const lines = [
+    `${nameEn}  ${nameZh}`,
+    companyEn,
+    companyZh,
+    '',
+  ];
+  if (tieLine)  lines.push(`Tel:    ${tieLine}`);
+  if (mobile)   lines.push(`Mob:    ${mobile}`);
+  if (email)    lines.push(`Email:  ${email}`);
+  if (website)  lines.push(`Web:    ${website}`);
+  if (address)  lines.push(`Add:    ${address}${location ? ', ' + location : ''}`);
+  return lines.join('\n');
+}
+
+/* ================================================================
+   APPLY COLOR SCHEME → CSS VARIABLES
+   ================================================================ */
+function applyScheme(key) {
+  state.scheme = key;
+  const sc = SCHEMES[key];
+  const root = document.documentElement;
+  root.style.setProperty('--a1',   sc.p);
+  root.style.setProperty('--a2',   sc.s);
+  root.style.setProperty('--glow', sc.glow);
+
+  document.querySelectorAll('.scheme-btn').forEach(btn => {
+    btn.classList.toggle('active', btn.dataset.scheme === key);
+  });
+
+  const icon = document.getElementById('headerIcon');
+  icon.style.background  = `linear-gradient(135deg,${sc.p},${sc.s})`;
+  icon.style.boxShadow   = `0 0 24px ${sc.glow}`;
+}
+
+/* ================================================================
+   RENDER SCHEME BUTTONS
+   ================================================================ */
+function renderSchemes() {
+  const grid = document.getElementById('schemesGrid');
+  grid.innerHTML = Object.entries(SCHEMES).map(([key, sc]) => `
+    <button class="scheme-btn${key === state.scheme ? ' active' : ''}"
+            data-scheme="${key}" onclick="selectScheme('${key}')">
+      <div class="scheme-swatch"
+           style="background:linear-gradient(135deg,${sc.p},${sc.s});box-shadow:0 2px 8px ${sc.glow};"></div>
+      <div class="scheme-label">${sc.name}</div>
+    </button>
+  `).join('');
+}
+
+/* ================================================================
+   UPDATE PREVIEW
+   ================================================================ */
+function updatePreview() {
+  const html = generateSignatureHTML();
+  document.getElementById('signaturePreview').innerHTML = html;
+  document.getElementById('codePreview').textContent = html;
+  document.getElementById('logoThumb').src = getLogoSrc();
+}
+
+/* ================================================================
+   EVENT HANDLERS
+   ================================================================ */
+function selectScheme(key) {
+  applyScheme(key);
+  updatePreview();
+}
+
+function bindFormInputs() {
+  ['nameEn','nameZh','companyEn','companyZh','tieLine','mobile','email','website','address','location']
+    .forEach(id => {
+      const el = document.getElementById(id);
+      if (el) el.addEventListener('input', () => { state[id] = el.value; updatePreview(); });
+    });
+
+  document.getElementById('logoUrl').addEventListener('input', function() {
+    state.logoSrc = this.value.trim() || null;
+    updatePreview();
+  });
+}
+
+function bindLogoUpload() {
+  document.getElementById('logoFileInput').addEventListener('change', function(e) {
+    const file = e.target.files[0];
+    if (!file) return;
+    const reader = new FileReader();
+    reader.onload = ev => {
+      state.logoSrc = ev.target.result;
+      document.getElementById('logoUrl').value = '';
+      updatePreview();
+    };
+    reader.readAsDataURL(file);
+  });
+
+  document.getElementById('resetLogoBtn').addEventListener('click', () => {
+    state.logoSrc = null;
+    document.getElementById('logoUrl').value = '';
+    document.getElementById('logoFileInput').value = '';
+    updatePreview();
+  });
+}
+
+/* ================================================================
+   COPY TO CLIPBOARD
+   ================================================================ */
+function showToast(msg) {
+  const toast = document.getElementById('toast');
+  document.getElementById('toastMsg').textContent = msg;
+  toast.classList.add('show');
+  clearTimeout(toast._timer);
+  toast._timer = setTimeout(() => toast.classList.remove('show'), 2600);
+}
+
+function copyText(text, msg) {
+  if (navigator.clipboard && navigator.clipboard.writeText) {
+    navigator.clipboard.writeText(text).then(() => showToast(msg));
+  } else {
+    // fallback
+    const ta = Object.assign(document.createElement('textarea'), {
+      value: text,
+      style: 'position:fixed;opacity:0;top:0;left:0;'
+    });
+    document.body.appendChild(ta);
+    ta.focus(); ta.select();
+    try { document.execCommand('copy'); showToast(msg); } catch {}
+    document.body.removeChild(ta);
+  }
+}
+
+document.getElementById('copyHtmlBtn').addEventListener('click', () =>
+  copyText(generateSignatureHTML(), '✓ HTML 已複製！請貼到 Email 簽名設定'));
+
+document.getElementById('copyTextBtn').addEventListener('click', () =>
+  copyText(generatePlainText(), '✓ 純文字已複製！'));
+
+/* ================================================================
+   DOWNLOAD HTML FILE
+   ================================================================ */
+document.getElementById('downloadHtmlBtn').addEventListener('click', () => {
+  const signatureHTML = generateSignatureHTML();
+  const fullHTML = `<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Email Signature</title>
+</head>
+<body>
+${signatureHTML}
+</body>
+</html>`;
+  const blob = new Blob([fullHTML], { type: 'text/html;charset=utf-8' });
+  const url  = URL.createObjectURL(blob);
+  const a    = Object.assign(document.createElement('a'), {
+    href: url, download: 'signature.html'
+  });
+  document.body.appendChild(a);
+  a.click();
+  document.body.removeChild(a);
+  URL.revokeObjectURL(url);
+  showToast('✓ signature.html 已下載！');
+});
+
+/* ================================================================
+   INIT
+   ================================================================ */
+(function init() {
+  renderSchemes();
+  applyScheme(state.scheme);
+  bindFormInputs();
+  bindLogoUpload();
+  updatePreview();
+})();
+</script>
+</body>
+</html>
