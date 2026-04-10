@@ -443,6 +443,13 @@
           <label>姓名顏色</label>
           <input type="color" id="nameColor" value="#1a1a2e" style="width:48px;height:32px;padding:2px;border-radius:6px;border:1px solid rgba(255,255,255,0.15);background:transparent;cursor:pointer;">
         </div>
+        <div class="field">
+          <label>顯示右上圓圈裝飾</label>
+          <label style="display:inline-flex;align-items:center;gap:8px;cursor:pointer;">
+            <input type="checkbox" id="showDots" checked style="width:16px;height:16px;cursor:pointer;accent-color:var(--a1);">
+            <span style="font-size:12px;color:var(--text-sub);">顯示</span>
+          </label>
+        </div>
       </div>
 
     </aside><!-- /form-panel -->
@@ -522,6 +529,7 @@ const state = {
   logoHeight: 43,
   scheme:    'blue',
   nameColor: '#1a1a2e',
+  showDots:  true,
   labelTieLine: '公司電話',
   labelMobile:  '行動電話',
   labelEmail:   '電子郵件',
@@ -660,7 +668,7 @@ function generateSignatureHTML(forPreview = false) {
   const { nameEn, nameZh, companyEn, companyZh,
           tieLine, mobile, email, website, address, location,
           labelTieLine, labelMobile, labelEmail, labelMailing } = state;
-  const { p: primary, dots } = SCHEMES[state.scheme];
+  const { p: primary } = SCHEMES[state.scheme];
   const logo  = getLogoSrc();
   const logoW = state.logoWidth;
   const logoH = state.logoHeight;
@@ -721,11 +729,11 @@ function generateSignatureHTML(forPreview = false) {
                   ${ed('companyZh', companyZh)}&nbsp;|&nbsp;${ed('companyEn', companyEn)}
                 </span>
               </td>
-              <td style="vertical-align:middle;text-align:right;padding-left:16px;padding-right:8px;white-space:nowrap;">
-                <span style="display:inline-block;width:11px;height:11px;border-radius:50%;background:${dots[0]};margin-right:5px;"></span>
-                <span style="display:inline-block;width:11px;height:11px;border-radius:50%;background:${dots[1]};margin-right:5px;"></span>
-                <span style="display:inline-block;width:11px;height:11px;border-radius:50%;background:${dots[2]};"></span>
-              </td>
+              ${state.showDots ? `<td style="vertical-align:middle;text-align:right;padding-left:16px;padding-right:8px;white-space:nowrap;">
+                <span style="display:inline-block;width:11px;height:11px;border-radius:50%;background:#ff5f57;margin-right:5px;"></span>
+                <span style="display:inline-block;width:11px;height:11px;border-radius:50%;background:#ffbd2e;margin-right:5px;"></span>
+                <span style="display:inline-block;width:11px;height:11px;border-radius:50%;background:#28c941;"></span>
+              </td>` : ''}
             </tr>
           </tbody>
         </table>
@@ -883,6 +891,9 @@ function bindFormInputs() {
 
   const nameColorEl = document.getElementById('nameColor');
   if (nameColorEl) nameColorEl.addEventListener('input', () => { state.nameColor = nameColorEl.value; updatePreview(); });
+
+  const showDotsEl = document.getElementById('showDots');
+  if (showDotsEl) showDotsEl.addEventListener('change', () => { state.showDots = showDotsEl.checked; updatePreview(); });
 
 
   document.getElementById('logoUrl').addEventListener('input', function() {
