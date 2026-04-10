@@ -339,12 +339,22 @@
     .btn-copy-image:active { transform: none; }
     .btn-copy-image:disabled { opacity: 0.5; cursor: not-allowed; transform: none !important; filter: none; }
     .btn-copy-imgmap {
-      background: var(--bg-card); color: var(--text-sub);
-      border: 1px solid var(--border);
+      background: linear-gradient(90deg, var(--a2), var(--a1), var(--a2));
+      background-size: 200% 100%;
+      background-position: 100% 0;
+      color: #fff;
+      border: none;
+      box-shadow: 0 4px 20px var(--glow), 0 0 0 2px rgba(255,255,255,0.12) inset;
+      animation: shimmer 3s ease-in-out infinite;
     }
-    .btn-copy-imgmap:hover { color: #fff; border-color: var(--a1); background: var(--a1); }
-    .btn-copy-imgmap:active { transform: none; filter: brightness(0.92); }
-    .btn-copy-imgmap:disabled { opacity: 0.5; cursor: not-allowed; }
+    @keyframes shimmer {
+      0%   { background-position: 100% 0; }
+      50%  { background-position: 0% 0; }
+      100% { background-position: 100% 0; }
+    }
+    .btn-copy-imgmap:hover { transform: translateY(-1px); box-shadow: 0 6px 28px var(--glow), 0 0 0 2px rgba(255,255,255,0.2) inset; filter: brightness(1.1); }
+    .btn-copy-imgmap:active { transform: none; filter: brightness(0.92); animation: none; }
+    .btn-copy-imgmap:disabled { opacity: 0.5; cursor: not-allowed; animation: none; }
 
     /* ── Code block (kept for reference, element removed from DOM) ── */
     .code-body {
