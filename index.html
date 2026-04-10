@@ -431,10 +431,6 @@
           <label>姓名顏色</label>
           <input type="color" id="nameColor" value="#1a1a2e" style="width:48px;height:32px;padding:2px;border-radius:6px;border:1px solid rgba(255,255,255,0.15);background:transparent;cursor:pointer;">
         </div>
-        <div class="field">
-          <label>側邊框線顏色</label>
-          <input type="color" id="borderColor" value="#0066ff" style="width:48px;height:32px;padding:2px;border-radius:6px;border:1px solid rgba(255,255,255,0.15);background:transparent;cursor:pointer;">
-        </div>
       </div>
 
     </aside><!-- /form-panel -->
@@ -512,9 +508,8 @@ const state = {
   logoSrc:    null,   // null = 使用預設 PNG logo
   logoWidth:  75,
   logoHeight: 75,
-  scheme:      'blue',
-  nameColor:   '#1a1a2e',
-  borderColor: '#0066ff',
+  scheme:    'blue',
+  nameColor: '#1a1a2e',
   labelTieLine: '公司電話',
   labelMobile:  '行動電話',
   labelEmail:   '電子郵件',
@@ -711,11 +706,11 @@ function generateSignatureHTML(forPreview = false) {
   // ── Preview: <div> wrapper → reliable border-radius + overflow:hidden in browser & html2canvas
   // ── Email:   outer <table> with border → compatible with Outlook / Gmail / Notes
   if (forPreview) {
-    return `<div style="border-left:3px solid ${state.borderColor};border-right:1px solid #dddddd;border-bottom:1px solid #dddddd;border-radius:8px;overflow:hidden;">${innerTable}</div>`;
+    return `<div style="border:2px solid ${primary};border-radius:8px;overflow:hidden;">${innerTable}</div>`;
   }
   return `<!-- Email Signature — ChunTai Tech / 崇太科技 -->
 <table cellpadding="0" cellspacing="0" border="0" width="100%" role="presentation"
-       style="border-collapse:separate;border-spacing:0;width:100%;border-left:3px solid ${state.borderColor};border-right:1px solid #dddddd;border-bottom:1px solid #dddddd;border-radius:8px;overflow:hidden;">
+       style="border-collapse:separate;border-spacing:0;width:100%;border:2px solid ${primary};border-radius:8px;overflow:hidden;">
   <tr><td style="padding:0;">${innerTable}</td></tr>
 </table>`;
 }
@@ -750,10 +745,6 @@ function applyScheme(key) {
   root.style.setProperty('--a1',   sc.p);
   root.style.setProperty('--a2',   sc.s);
   root.style.setProperty('--glow', sc.glow);
-  // 切換配色時同步側邊框線顏色
-  state.borderColor = sc.p;
-  const bcEl = document.getElementById('borderColor');
-  if (bcEl) bcEl.value = sc.p;
 
   document.querySelectorAll('.scheme-btn').forEach(btn => {
     btn.classList.toggle('active', btn.dataset.scheme === key);
@@ -842,8 +833,6 @@ function bindFormInputs() {
   const nameColorEl = document.getElementById('nameColor');
   if (nameColorEl) nameColorEl.addEventListener('input', () => { state.nameColor = nameColorEl.value; updatePreview(); });
 
-  const borderColorEl = document.getElementById('borderColor');
-  if (borderColorEl) borderColorEl.addEventListener('input', () => { state.borderColor = borderColorEl.value; updatePreview(); });
 
   document.getElementById('logoUrl').addEventListener('input', function() {
     const src = this.value.trim();
