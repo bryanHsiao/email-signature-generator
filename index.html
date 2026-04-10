@@ -68,10 +68,14 @@
        HEADER
        ============================================================ */
     .header {
-      padding: 36px 0 28px;
+      position: sticky; top: 0; z-index: 200;
+      padding: 14px 28px;
+      margin: 0 -28px 30px;
       display: flex; align-items: center; gap: 14px;
       border-bottom: 1px solid var(--border);
-      margin-bottom: 30px;
+      background: rgba(8,8,15,0.90);
+      backdrop-filter: blur(20px);
+      -webkit-backdrop-filter: blur(20px);
     }
     .header-icon {
       width: 46px; height: 46px; border-radius: 13px; flex-shrink: 0;
