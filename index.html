@@ -706,7 +706,7 @@ function generateSignatureHTML(forPreview = false) {
     : esc(text);
 
   // ── Contact rows ──
-  const P = 'margin:0 0 4px 0;padding:0;font-size:12px;color:#333333;font-family:Arial,Helvetica,sans-serif;line-height:1.4;';
+  const P = 'margin:0 0 5px 0;padding:0;font-size:14px;color:#333333;font-family:Arial,Helvetica,sans-serif;line-height:1.5;';
   const contactLines = [];
   if (tieLine) contactLines.push(
     `<p style="${P}">${ed('labelTieLine', labelTieLine)}：${ed('tieLine', tieLine)}</p>`
@@ -732,7 +732,7 @@ function generateSignatureHTML(forPreview = false) {
   );
   if (location) footerParts.push(ed('location', location));
   const footerHTML = footerParts.length
-    ? `<p style="margin:0 0 4px 0;padding:0;font-size:12px;color:#333333;font-family:Arial,Helvetica,sans-serif;line-height:1.4;">${footerParts.join('&nbsp;&nbsp;')}</p>`
+    ? `<p style="margin:0 0 5px 0;padding:0;font-size:14px;color:#333333;font-family:Arial,Helvetica,sans-serif;line-height:1.5;">${footerParts.join('&nbsp;&nbsp;')}</p>`
     : '';
 
   // ── Build inner content table (shared by preview & email) ──
