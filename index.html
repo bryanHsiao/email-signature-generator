@@ -459,12 +459,12 @@
         <div class="field" style="margin-top:12px;">
           <label>英文字體</label>
           <select id="fontSelectEn" onchange="selectFont('en', this.value)"
-            style="width:100%;padding:8px 10px;border-radius:8px;border:1px solid rgba(255,255,255,0.12);background:rgba(255,255,255,0.06);color:var(--text);font-size:13px;cursor:pointer;outline:none;"></select>
+            style="width:100%;padding:8px 10px;border-radius:8px;border:1px solid rgba(255,255,255,0.12);background:#1e2030;color:#e2e8f0;font-size:13px;cursor:pointer;outline:none;"></select>
         </div>
         <div class="field" style="margin-top:8px;">
           <label>中文字體</label>
           <select id="fontSelectZh" onchange="selectFont('zh', this.value)"
-            style="width:100%;padding:8px 10px;border-radius:8px;border:1px solid rgba(255,255,255,0.12);background:rgba(255,255,255,0.06);color:var(--text);font-size:13px;cursor:pointer;outline:none;"></select>
+            style="width:100%;padding:8px 10px;border-radius:8px;border:1px solid rgba(255,255,255,0.12);background:#1e2030;color:#e2e8f0;font-size:13px;cursor:pointer;outline:none;"></select>
         </div>
       </div>
 
@@ -949,12 +949,12 @@ function renderFontBtns() {
   const zhSel = document.getElementById('fontSelectZh');
   if (enSel) {
     enSel.innerHTML = Object.entries(FONTS).map(([k, f]) =>
-      `<option value="${k}" ${k === state.nameFontEn ? 'selected' : ''} style="font-family:${f.family};">${f.name}　${f.family.split(',')[0].replace(/'/g,'')}</option>`
+      `<option value="${k}" ${k === state.nameFontEn ? 'selected' : ''} style="font-family:${f.family};background:#1e2030;color:#e2e8f0;">${f.name}　${f.family.split(',')[0].replace(/'/g,'')}</option>`
     ).join('');
   }
   if (zhSel) {
     zhSel.innerHTML = Object.entries(FONTS_ZH).map(([k, f]) =>
-      `<option value="${k}" ${k === state.nameFontZh ? 'selected' : ''} style="font-family:${f.family};">${f.name}　${f.family.split(',')[0].replace(/'/g,'')}</option>`
+      `<option value="${k}" ${k === state.nameFontZh ? 'selected' : ''} style="font-family:${f.family};background:#1e2030;color:#e2e8f0;">${f.name}　${f.family.split(',')[0].replace(/'/g,'')}</option>`
     ).join('');
   }
 }
