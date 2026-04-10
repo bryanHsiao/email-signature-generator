@@ -309,24 +309,7 @@
     .btn-copy-image:hover { color: var(--a2); border-color: var(--a1); background: rgba(255,255,255,0.06); }
     .btn-copy-image:disabled { opacity: 0.5; cursor: not-allowed; transform: none !important; }
 
-    /* ── Code block ── */
-    .code-card {
-      background: var(--bg-card); border: 1px solid var(--border);
-      border-radius: var(--radius); overflow: hidden; backdrop-filter: blur(12px);
-    }
-    .code-header {
-      padding: 11px 16px; border-bottom: 1px solid var(--border);
-      display: flex; align-items: center; justify-content: space-between;
-    }
-    .code-header-label {
-      font-family: 'Syne', sans-serif; font-size: 10.5px; font-weight: 700;
-      letter-spacing: 0.12em; text-transform: uppercase; color: var(--text-sub);
-      display: flex; align-items: center; gap: 7px;
-    }
-    .code-header-label::before {
-      content: ''; width: 8px; height: 8px; border-radius: 50%;
-      background: linear-gradient(135deg, var(--a1), var(--a2)); flex-shrink: 0;
-    }
+    /* ── Code block (kept for reference, element removed from DOM) ── */
     .code-body {
       padding: 14px 16px; max-height: 140px; overflow: auto;
       font-family: 'Courier New', Courier, monospace; font-size: 10.5px;
@@ -478,14 +461,6 @@
         <button class="btn-copy btn-copy-image" id="downloadImgBtn">
           🖼 下載圖片
         </button>
-      </div>
-
-      <!-- HTML source preview -->
-      <div class="code-card">
-        <div class="code-header">
-          <div class="code-header-label">HTML 原始碼</div>
-        </div>
-        <div class="code-body" id="codePreview"></div>
       </div>
 
     </section><!-- /preview-panel -->
@@ -781,9 +756,7 @@ function renderSchemes() {
    UPDATE PREVIEW
    ================================================================ */
 function updatePreview() {
-  const emailHtml = generateSignatureHTML(false);
   document.getElementById('signaturePreview').innerHTML = generateSignatureHTML(true);
-  document.getElementById('codePreview').textContent = emailHtml;
   document.getElementById('logoThumb').src = getLogoSrc();
 
   // ── Bind inline editable fields ──
@@ -795,8 +768,6 @@ function updatePreview() {
       // 同步回左側表單
       const formEl = document.getElementById(field);
       if (formEl) formEl.value = val;
-      // 更新 code panel（不重繪 preview，保留編輯體驗）
-      document.getElementById('codePreview').textContent = generateSignatureHTML(false);
     });
     // Enter 確認，不換行
     span.addEventListener('keydown', e => {
