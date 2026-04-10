@@ -828,14 +828,12 @@ function renderSchemes() {
     if (key === 'custom') {
       return `
     <button class="scheme-btn${key === state.scheme ? ' active' : ''}"
-            data-scheme="custom" onclick="selectScheme('custom')">
+            data-scheme="custom" onclick="document.getElementById('customColorPicker').click()">
       <div class="scheme-swatch" style="position:relative;background:linear-gradient(135deg,${sc.p},${sc.s});box-shadow:0 2px 8px ${sc.glow};">
         <span style="position:absolute;inset:0;display:flex;align-items:center;justify-content:center;font-size:18px;pointer-events:none;">🎨</span>
         <input type="color" id="customColorPicker" value="${sc.p}"
-               title="點擊選取自訂顏色"
-               style="position:absolute;inset:0;opacity:0;cursor:pointer;width:100%;height:100%;border:none;padding:0;"
-               oninput="updateCustomScheme(this.value)"
-               onclick="event.stopPropagation()">
+               style="position:absolute;width:0;height:0;opacity:0;pointer-events:none;border:none;padding:0;"
+               oninput="updateCustomScheme(this.value)">
       </div>
       <div class="scheme-label">${sc.name}</div>
     </button>`;
