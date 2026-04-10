@@ -694,7 +694,7 @@ function generateSignatureHTML(forPreview = false) {
   const { nameEn, nameZh, companyEn, companyZh,
           tieLine, mobile, email, website, address, location,
           labelTieLine, labelMobile, labelEmail, labelMailing } = state;
-  const { p: primary } = SCHEMES[state.scheme];
+  const { p: primary, s: secondary } = SCHEMES[state.scheme];
   const logo  = getLogoSrc();
   const logoW = state.logoWidth;
   const logoH = state.logoHeight;
@@ -768,26 +768,35 @@ function generateSignatureHTML(forPreview = false) {
 
     <!-- ② Body: white background, left accent border -->
     <tr>
-      <td bgcolor="#ffffff"
-          style="background-color:#ffffff;padding:12px 16px;">
+      <td bgcolor="#ffffff" style="background-color:#ffffff;padding:10px 14px;">
+        <table cellpadding="0" cellspacing="0" border="0" style="border-collapse:collapse;width:100%;">
+          <tr>
+            <!-- 左側裝飾條 -->
+            <td width="4" style="width:4px;background:linear-gradient(180deg,${primary},${secondary});border-radius:2px;padding:0;">&nbsp;</td>
+            <td width="10" style="width:10px;padding:0;">&nbsp;</td>
+            <!-- 內容 -->
+            <td style="padding:4px 0;">
 
-        <!-- Name -->
-        <p style="margin:0 0 8px 0;padding:0;font-size:17px;font-weight:700;color:${state.nameColor};line-height:1.2;">
-          ${forPreview
-            ? `<span contenteditable="true" data-field="nameEn" class="editable-label" style="font-family:${FONTS[state.nameFontEn].family};">${esc(nameEn)}</span>`
-            : `<span style="font-family:${FONTS[state.nameFontEn].family};">${esc(nameEn)}</span>`
-          }&nbsp;&nbsp;${forPreview
-            ? `<span contenteditable="true" data-field="nameZh" class="editable-label" style="font-family:${FONTS_ZH[state.nameFontZh].family};">${esc(nameZh)}</span>`
-            : `<span style="font-family:${FONTS_ZH[state.nameFontZh].family};">${esc(nameZh)}</span>`
-          }
-        </p>
+              <!-- Name -->
+              <p style="margin:0 0 8px 0;padding:0;font-size:17px;font-weight:700;color:${state.nameColor};line-height:1.2;">
+                ${forPreview
+                  ? `<span contenteditable="true" data-field="nameEn" class="editable-label" style="font-family:${FONTS[state.nameFontEn].family};">${esc(nameEn)}</span>`
+                  : `<span style="font-family:${FONTS[state.nameFontEn].family};">${esc(nameEn)}</span>`
+                }&nbsp;&nbsp;${forPreview
+                  ? `<span contenteditable="true" data-field="nameZh" class="editable-label" style="font-family:${FONTS_ZH[state.nameFontZh].family};">${esc(nameZh)}</span>`
+                  : `<span style="font-family:${FONTS_ZH[state.nameFontZh].family};">${esc(nameZh)}</span>`
+                }
+              </p>
 
-        <!-- Contact rows -->
-        ${contactLines.join('')}
+              <!-- Contact rows -->
+              ${contactLines.join('')}
 
-        <!-- Footer: address / website / location -->
-        ${footerHTML}
+              <!-- Footer: address / website / location -->
+              ${footerHTML}
 
+            </td>
+          </tr>
+        </table>
       </td>
     </tr>
 
