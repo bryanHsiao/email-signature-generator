@@ -629,92 +629,74 @@ function generateSignatureHTML() {
   const logoW = state.logoWidth;
   const logoH = state.logoHeight;
 
-  // ── Contact lines (each line = one <p>, no nested table) ──
+  // ── Contact rows ──
   const contactLines = [];
-
   if (tieLine) contactLines.push(
-    `<span style="display:inline-block;width:44px;font-size:10px;font-weight:700;color:#bbbbbb;font-family:Arial,Helvetica,sans-serif;letter-spacing:0.08em;text-transform:uppercase;vertical-align:middle;">Tel</span>`
-    + `<span style="font-size:12px;color:#444444;font-family:Arial,Helvetica,sans-serif;vertical-align:middle;">${esc(tieLine)}</span>`
+    `<p style="margin:0 0 4px 0;padding:0;font-size:12px;color:#333333;font-family:Arial,Helvetica,sans-serif;line-height:1.4;">Tie-Line：${esc(tieLine)}</p>`
   );
   if (mobile) contactLines.push(
-    `<span style="display:inline-block;width:44px;font-size:10px;font-weight:700;color:#bbbbbb;font-family:Arial,Helvetica,sans-serif;letter-spacing:0.08em;text-transform:uppercase;vertical-align:middle;">Mob</span>`
-    + `<span style="font-size:12px;color:#444444;font-family:Arial,Helvetica,sans-serif;vertical-align:middle;">${esc(mobile)}</span>`
+    `<p style="margin:0 0 4px 0;padding:0;font-size:12px;color:#333333;font-family:Arial,Helvetica,sans-serif;line-height:1.4;">Outside：${esc(mobile)}</p>`
   );
   if (email) contactLines.push(
-    `<span style="display:inline-block;width:44px;font-size:10px;font-weight:700;color:#bbbbbb;font-family:Arial,Helvetica,sans-serif;letter-spacing:0.08em;text-transform:uppercase;vertical-align:middle;">Email</span>`
-    + `<a href="mailto:${esc(email)}" style="font-size:12px;color:${primary};text-decoration:none;font-family:Arial,Helvetica,sans-serif;vertical-align:middle;">${esc(email)}</a>`
+    `<p style="margin:0 0 4px 0;padding:0;font-size:12px;color:#333333;font-family:Arial,Helvetica,sans-serif;line-height:1.4;">Email：<a href="mailto:${esc(email)}" style="color:${primary};text-decoration:none;">${esc(email)}</a></p>`
   );
-  if (website) contactLines.push(
-    `<span style="display:inline-block;width:44px;font-size:10px;font-weight:700;color:#bbbbbb;font-family:Arial,Helvetica,sans-serif;letter-spacing:0.08em;text-transform:uppercase;vertical-align:middle;">Web</span>`
-    + `<a href="${esc(website)}" target="_blank" style="font-size:12px;color:${primary};text-decoration:none;font-family:Arial,Helvetica,sans-serif;vertical-align:middle;">${esc(website.replace(/^https?:\/\//,''))}</a>`
-  );
-  if (address || location) {
-    const addrText = [address ? esc(address) : '', location ? esc(location) : ''].filter(Boolean).join('&nbsp;&nbsp;');
-    contactLines.push(
-      `<span style="display:inline-block;width:44px;font-size:10px;font-weight:700;color:#bbbbbb;font-family:Arial,Helvetica,sans-serif;letter-spacing:0.08em;text-transform:uppercase;vertical-align:top;">Add</span>`
-      + `<span style="font-size:12px;color:#444444;font-family:Arial,Helvetica,sans-serif;vertical-align:top;">${addrText}</span>`
-    );
-  }
 
-  const contactHTML = contactLines.map(line =>
-    `<p style="margin:0 0 5px 0;padding:0;line-height:1.4;">${line}</p>`
-  ).join('');
+  // ── Footer line: address + website + location ──
+  const footerParts = [];
+  if (address) footerParts.push(`— Mailing：${esc(address)}`);
+  if (website) footerParts.push(
+    `<a href="${esc(website)}" target="_blank" style="color:${primary};text-decoration:none;">${esc(website)}</a>`
+  );
+  if (location) footerParts.push(esc(location));
+  const footerHTML = footerParts.length
+    ? `<p style="margin:6px 0 0 0;padding:0;font-size:11px;color:#888888;font-family:Arial,Helvetica,sans-serif;line-height:1.5;">${footerParts.join('&nbsp;&nbsp;')}</p>`
+    : '';
 
   return `<!-- Email Signature — ChunTai Tech / 崇太科技 -->
 <table cellpadding="0" cellspacing="0" border="0" width="520" role="presentation"
        style="border-collapse:collapse;width:520px;max-width:100%;">
   <tbody>
 
-    <!-- ① Top accent bar -->
+    <!-- ① Header: colored banner — logo + company names -->
     <tr>
-      <td colspan="3" bgcolor="${primary}" height="3"
-          style="background-color:${primary};height:3px;line-height:3px;font-size:0;padding:0;"> </td>
+      <td bgcolor="${primary}" style="background-color:${primary};padding:10px 14px;">
+        <table cellpadding="0" cellspacing="0" border="0" role="presentation">
+          <tbody>
+            <tr>
+              <td style="padding-right:12px;vertical-align:middle;">
+                <img src="${logo}" width="${logoW}" height="${logoH}" alt="${esc(companyZh)}"
+                     style="display:block;border:0;outline:0;-ms-interpolation-mode:bicubic;max-width:${logoW}px;max-height:${logoH}px;">
+              </td>
+              <td style="vertical-align:middle;">
+                <span style="font-size:14px;font-weight:700;color:#ffffff;font-family:Arial,Helvetica,sans-serif;line-height:1.4;">
+                  ${esc(companyZh)}&nbsp;|&nbsp;${esc(companyEn)}
+                </span>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </td>
     </tr>
 
-    <!-- ② Main row: [logo] [2px divider] [content] -->
+    <!-- ② Body: white background, left accent border -->
     <tr>
-
-      <!-- Logo -->
-      <td width="${logoW + 16}" valign="middle"
-          style="width:${logoW + 16}px;padding:16px 16px 16px 0;vertical-align:middle;">
-        <img src="${logo}" width="${logoW}" height="${logoH}" alt="${esc(companyZh)}"
-             style="display:block;border:0;outline:0;-ms-interpolation-mode:bicubic;max-width:${logoW}px;max-height:${logoH}px;">
-      </td>
-
-      <!-- Vertical divider -->
-      <td width="2" bgcolor="${primary}"
-          style="width:2px;background-color:${primary};padding:0;"> </td>
-
-      <!-- Content: all <p> tags, no nested tables -->
-      <td valign="top" style="padding:16px 0 16px 20px;vertical-align:top;font-family:Arial,Helvetica,sans-serif;">
+      <td bgcolor="#ffffff"
+          style="background-color:#ffffff;padding:12px 16px;border-left:3px solid ${primary};border-right:1px solid #dddddd;border-bottom:1px solid #dddddd;">
 
         <!-- Name -->
-        <p style="margin:0 0 5px 0;padding:0;font-size:20px;font-weight:700;color:#1a1a2e;font-family:Arial,Helvetica,sans-serif;line-height:1.2;white-space:nowrap;">
+        <p style="margin:0 0 8px 0;padding:0;font-size:17px;font-weight:700;color:${primary};font-family:Arial,Helvetica,sans-serif;line-height:1.2;">
           ${esc(nameEn)}&nbsp;&nbsp;${esc(nameZh)}
         </p>
 
-        <!-- Accent line -->
-        <table cellpadding="0" cellspacing="0" border="0" role="presentation" style="margin-bottom:8px;">
-          <tr>
-            <td bgcolor="${primary}" width="180" height="2"
-                style="background-color:${primary};height:2px;line-height:2px;font-size:0;"> </td>
-          </tr>
-        </table>
+        <!-- Contact rows -->
+        ${contactLines.join('')}
 
-        <!-- Company -->
-        <p style="margin:0 0 2px 0;padding:0;font-size:12px;font-weight:700;color:${primary};font-family:Arial,Helvetica,sans-serif;line-height:1.5;">
-          ${esc(companyEn)}
-        </p>
-        <p style="margin:0 0 12px 0;padding:0;font-size:11px;color:#999999;font-family:Arial,Helvetica,sans-serif;line-height:1.5;">
-          ${esc(companyZh)}
-        </p>
+        <!-- Footer: address / website / location -->
+        ${footerHTML}
 
-        <!-- Contact -->
-        ${contactHTML}
-
-      </td><!-- /Content -->
-
+      </td>
     </tr>
+
   </tbody>
 </table>`;
 }
