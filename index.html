@@ -539,24 +539,35 @@ const SCHEMES = {
     p: '#0066ff', s: '#00c6ff',
     glow: 'rgba(0,102,255,0.22)',
     rgb: '0,102,255',
+    dots: ['#ff5f57','#ffbd2e','#28c941'],
   },
   orange: {
     name: '活力橘',
     p: '#ff6b35', s: '#ffaa00',
     glow: 'rgba(255,107,53,0.22)',
     rgb: '255,107,53',
+    dots: ['#e53e3e','#dd6b20','#ffd700'],
   },
   purple: {
     name: '優雅紫',
     p: '#8b5cf6', s: '#ec4899',
     glow: 'rgba(139,92,246,0.22)',
     rgb: '139,92,246',
+    dots: ['#ec4899','#8b5cf6','#a78bfa'],
   },
   green: {
     name: '清新綠',
     p: '#10b981', s: '#06b6d4',
     glow: 'rgba(16,185,129,0.22)',
     rgb: '16,185,129',
+    dots: ['#06b6d4','#10b981','#84cc16'],
+  },
+  dark: {
+    name: '深色模式',
+    p: '#1e293b', s: '#334155',
+    glow: 'rgba(30,41,59,0.5)',
+    rgb: '30,41,59',
+    dots: ['#ff453a','#ffd60a','#30d158'],
   },
 };
 
@@ -628,7 +639,7 @@ function generateSignatureHTML(forPreview = false) {
   const { nameEn, nameZh, companyEn, companyZh,
           tieLine, mobile, email, website, address, location,
           labelTieLine, labelMobile, labelEmail, labelMailing } = state;
-  const { p: primary } = SCHEMES[state.scheme];
+  const { p: primary, dots } = SCHEMES[state.scheme];
   const logo  = getLogoSrc();
   const logoW = state.logoWidth;
   const logoH = state.logoHeight;
@@ -690,9 +701,9 @@ function generateSignatureHTML(forPreview = false) {
                 </span>
               </td>
               <td style="vertical-align:middle;text-align:right;padding-left:16px;padding-right:8px;white-space:nowrap;">
-                <span style="display:inline-block;width:11px;height:11px;border-radius:50%;background:#ff5f57;margin-right:5px;"></span>
-                <span style="display:inline-block;width:11px;height:11px;border-radius:50%;background:#ffbd2e;margin-right:5px;"></span>
-                <span style="display:inline-block;width:11px;height:11px;border-radius:50%;background:#28c941;"></span>
+                <span style="display:inline-block;width:11px;height:11px;border-radius:50%;background:${dots[0]};margin-right:5px;"></span>
+                <span style="display:inline-block;width:11px;height:11px;border-radius:50%;background:${dots[1]};margin-right:5px;"></span>
+                <span style="display:inline-block;width:11px;height:11px;border-radius:50%;background:${dots[2]};"></span>
               </td>
             </tr>
           </tbody>
