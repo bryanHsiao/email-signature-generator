@@ -411,6 +411,10 @@
           <label>中文姓名</label>
           <input type="text" id="nameZh" value="蕭恩政" placeholder="中文姓名">
         </div>
+        <div class="field">
+          <label>姓名顏色</label>
+          <input type="color" id="nameColor" value="#1a1a2e" style="width:48px;height:32px;padding:2px;border-radius:6px;border:1px solid rgba(255,255,255,0.15);background:transparent;cursor:pointer;">
+        </div>
       </div>
 
       <!-- 公司資訊 -->
@@ -430,12 +434,24 @@
       <div class="card">
         <div class="card-title">聯絡方式</div>
         <div class="field">
-          <label>Tie-Line（內線電話）</label>
+          <label>內線電話標題</label>
+          <input type="text" id="labelTieLine" value="Tie-Line" placeholder="e.g. Tie-Line / Tel">
+        </div>
+        <div class="field">
+          <label>內線電話</label>
           <input type="text" id="tieLine" value="886-2-2558-1229 # 231" placeholder="886-2-XXXX-XXXX # XXX">
         </div>
         <div class="field">
-          <label>Outside（手機）</label>
+          <label>手機標題</label>
+          <input type="text" id="labelMobile" value="Outside" placeholder="e.g. Outside / Mobile">
+        </div>
+        <div class="field">
+          <label>手機號碼</label>
           <input type="text" id="mobile" value="0928-662-718" placeholder="0900-000-000">
+        </div>
+        <div class="field">
+          <label>Email 標題</label>
+          <input type="text" id="labelEmail" value="Email" placeholder="e.g. Email / E-mail">
         </div>
         <div class="field">
           <label>Email</label>
@@ -444,6 +460,10 @@
         <div class="field">
           <label>公司網站</label>
           <input type="url" id="website" value="http://www.domino.com.tw">
+        </div>
+        <div class="field">
+          <label>地址標題</label>
+          <input type="text" id="labelMailing" value="Mailing" placeholder="e.g. Mailing / Address">
         </div>
         <div class="field">
           <label>郵寄地址</label>
@@ -538,6 +558,11 @@ const state = {
   logoWidth:  75,
   logoHeight: 75,
   scheme:    'blue',
+  nameColor: '#1a1a2e',
+  labelTieLine: 'Tie-Line',
+  labelMobile:  'Outside',
+  labelEmail:   'Email',
+  labelMailing: 'Mailing',
 };
 
 /* ================================================================
@@ -636,7 +661,8 @@ function esc(v) {
    ================================================================ */
 function generateSignatureHTML() {
   const { nameEn, nameZh, companyEn, companyZh,
-          tieLine, mobile, email, website, address, location } = state;
+          tieLine, mobile, email, website, address, location,
+          labelTieLine, labelMobile, labelEmail, labelMailing } = state;
   const { p: primary } = SCHEMES[state.scheme];
   const logo  = getLogoSrc();
   const logoW = state.logoWidth;
@@ -645,18 +671,18 @@ function generateSignatureHTML() {
   // ── Contact rows ──
   const contactLines = [];
   if (tieLine) contactLines.push(
-    `<p style="margin:0 0 4px 0;padding:0;font-size:12px;color:#333333;font-family:Arial,Helvetica,sans-serif;line-height:1.4;">Tie-Line：${esc(tieLine)}</p>`
+    `<p style="margin:0 0 4px 0;padding:0;font-size:12px;color:#333333;font-family:Arial,Helvetica,sans-serif;line-height:1.4;">${esc(labelTieLine)}：${esc(tieLine)}</p>`
   );
   if (mobile) contactLines.push(
-    `<p style="margin:0 0 4px 0;padding:0;font-size:12px;color:#333333;font-family:Arial,Helvetica,sans-serif;line-height:1.4;">Outside：${esc(mobile)}</p>`
+    `<p style="margin:0 0 4px 0;padding:0;font-size:12px;color:#333333;font-family:Arial,Helvetica,sans-serif;line-height:1.4;">${esc(labelMobile)}：${esc(mobile)}</p>`
   );
   if (email) contactLines.push(
-    `<p style="margin:0 0 4px 0;padding:0;font-size:12px;color:#333333;font-family:Arial,Helvetica,sans-serif;line-height:1.4;">Email：<a href="mailto:${esc(email)}" style="color:${primary};text-decoration:none;">${esc(email)}</a></p>`
+    `<p style="margin:0 0 4px 0;padding:0;font-size:12px;color:#333333;font-family:Arial,Helvetica,sans-serif;line-height:1.4;">${esc(labelEmail)}：<a href="mailto:${esc(email)}" style="color:${primary};text-decoration:none;">${esc(email)}</a></p>`
   );
 
   // ── Footer line: address + website + location ──
   const footerParts = [];
-  if (address) footerParts.push(`— Mailing：${esc(address)}`);
+  if (address) footerParts.push(`— ${esc(labelMailing)}：${esc(address)}`);
   if (website) footerParts.push(
     `<a href="${esc(website)}" target="_blank" style="color:${primary};text-decoration:none;">${esc(website)}</a>`
   );
@@ -697,7 +723,7 @@ function generateSignatureHTML() {
           style="background-color:#ffffff;padding:12px 16px;border-left:3px solid ${primary};border-right:1px solid #dddddd;border-bottom:1px solid #dddddd;">
 
         <!-- Name -->
-        <p style="margin:0 0 8px 0;padding:0;font-size:17px;font-weight:700;color:${primary};font-family:Arial,Helvetica,sans-serif;line-height:1.2;">
+        <p style="margin:0 0 8px 0;padding:0;font-size:17px;font-weight:700;color:${state.nameColor};font-family:Arial,Helvetica,sans-serif;line-height:1.2;">
           ${esc(nameEn)}&nbsp;&nbsp;${esc(nameZh)}
         </p>
 
@@ -812,11 +838,14 @@ function selectScheme(key) {
 }
 
 function bindFormInputs() {
-  ['nameEn','nameZh','companyEn','companyZh','tieLine','mobile','email','website','address','location']
+  ['nameEn','nameZh','companyEn','companyZh','tieLine','mobile','email','website','address','location','labelTieLine','labelMobile','labelEmail','labelMailing']
     .forEach(id => {
       const el = document.getElementById(id);
       if (el) el.addEventListener('input', () => { state[id] = el.value; updatePreview(); });
     });
+
+  const nameColorEl = document.getElementById('nameColor');
+  if (nameColorEl) nameColorEl.addEventListener('input', () => { state.nameColor = nameColorEl.value; updatePreview(); });
 
   document.getElementById('logoUrl').addEventListener('input', function() {
     const src = this.value.trim();
