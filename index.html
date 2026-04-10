@@ -270,6 +270,26 @@
     .email-divider {
       height: 1px; background: #ddd; margin-bottom: 18px;
     }
+
+    /* ── Edit hint marquee ── */
+    .edit-hint {
+      overflow: hidden; white-space: nowrap;
+      margin-bottom: 8px;
+      background: linear-gradient(90deg, rgba(99,179,237,0.12), rgba(99,179,237,0.06));
+      border-radius: 4px; padding: 4px 10px;
+      border-left: 2px solid #63b3ed;
+    }
+    .edit-hint-text {
+      display: inline-block;
+      font-size: 11px; color: #90cdf4; letter-spacing: 0.4px;
+      animation: hint-marquee 12s linear infinite;
+    }
+    @keyframes hint-marquee {
+      0%   { transform: translateX(0); }
+      30%  { transform: translateX(0); }
+      70%  { transform: translateX(-30%); }
+      100% { transform: translateX(0); }
+    }
     #signaturePreview { display: block; }
     /* ── Inline editable fields in preview ── */
     .editable-label {
@@ -458,7 +478,7 @@
         <div class="email-body">
           <div class="email-body-text">Hi，附上相關資料，如有任何問題請不吝告知，謝謝。</div>
           <div class="email-divider"></div>
-          <div style="font-size:11px;color:#aaa;margin-bottom:8px;letter-spacing:0.3px;">✏️ 點擊簽名中的任意文字即可直接編輯</div>
+          <div class="edit-hint"><span class="edit-hint-text">✏️ 點擊簽名中的任意文字即可直接編輯</span></div>
           <div id="signaturePreview"></div>
         </div>
       </div>
@@ -505,9 +525,9 @@ const state = {
   website:   'https://www.domino.com.tw',
   address:   '台北市長安西路180號10樓之一',
   location:  'Taipei Taiwan',
-  logoSrc:    null,   // null = 使用預設 PNG logo
-  logoWidth:  75,
-  logoHeight: 75,
+  logoSrc:    "data:image/gif;base64,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", // CTIlogo.gif embedded
+  logoWidth:  44,
+  logoHeight: 43,
   scheme:    'blue',
   nameColor: '#1a1a2e',
   labelTieLine: '公司電話',
@@ -515,6 +535,8 @@ const state = {
   labelEmail:   '電子郵件',
   labelMailing: '拜訪我們',
 };
+
+const DEFAULT_LOGO = { src: state.logoSrc, w: state.logoWidth, h: state.logoHeight };
 
 /* ================================================================
    COLOR SCHEMES
@@ -840,9 +862,9 @@ function bindFormInputs() {
       state.logoSrc = src;
       fitLogoDimensions(src, updatePreview);
     } else {
-      state.logoSrc   = null;
-      state.logoWidth  = 75;
-      state.logoHeight = 75;
+      state.logoSrc   = DEFAULT_LOGO.src;
+      state.logoWidth  = DEFAULT_LOGO.w;
+      state.logoHeight = DEFAULT_LOGO.h;
       updatePreview();
     }
   });
@@ -862,9 +884,9 @@ function bindLogoUpload() {
   });
 
   document.getElementById('resetLogoBtn').addEventListener('click', () => {
-    state.logoSrc    = null;
-    state.logoWidth  = 75;
-    state.logoHeight = 75;
+    state.logoSrc    = DEFAULT_LOGO.src;
+    state.logoWidth  = DEFAULT_LOGO.w;
+    state.logoHeight = DEFAULT_LOGO.h;
     document.getElementById('logoUrl').value = '';
     document.getElementById('logoFileInput').value = '';
     updatePreview();
