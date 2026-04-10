@@ -521,7 +521,9 @@ const state = {
   website:   'http://www.domino.com.tw',
   address:   '台北市長安西路180號10樓之一',
   location:  'Taipei Taiwan',
-  logoSrc:   null,   // null = 使用預設 SVG logo
+  logoSrc:    null,   // null = 使用預設 PNG logo
+  logoWidth:  75,
+  logoHeight: 75,
   scheme:    'blue',
 };
 
@@ -655,9 +657,9 @@ function generateSignatureHTML() {
     <tr>
 
       <!-- Logo -->
-      <td width="106" style="width:106px;padding:0 22px 0 0;vertical-align:middle;border-right:3px solid ${primary};">
-        <img src="${logo}" width="75" height="75" alt="${esc(companyZh)}"
-             style="display:block;border:0;outline:0;text-decoration:none;-ms-interpolation-mode:bicubic;border-radius:10px;">
+      <td width="${state.logoWidth + 22}" style="width:${state.logoWidth + 22}px;padding:0 22px 0 0;vertical-align:middle;border-right:3px solid ${primary};">
+        <img src="${logo}" width="${state.logoWidth}" height="${state.logoHeight}" alt="${esc(companyZh)}"
+             style="display:block;border:0;outline:0;text-decoration:none;-ms-interpolation-mode:bicubic;max-width:${state.logoWidth}px;max-height:${state.logoHeight}px;">
       </td>
 
       <!-- Content -->
@@ -794,6 +796,30 @@ function updatePreview() {
 }
 
 /* ================================================================
+   FIT LOGO DIMENSIONS (maintain aspect ratio within max bounds)
+   ================================================================ */
+const LOGO_MAX_W = 140;
+const LOGO_MAX_H = 90;
+
+function fitLogoDimensions(src, callback) {
+  const img = new Image();
+  img.onload = function() {
+    let w = this.naturalWidth, h = this.naturalHeight;
+    if (w > LOGO_MAX_W) { h = Math.round(h * LOGO_MAX_W / w); w = LOGO_MAX_W; }
+    if (h > LOGO_MAX_H) { w = Math.round(w * LOGO_MAX_H / h); h = LOGO_MAX_H; }
+    state.logoWidth  = w;
+    state.logoHeight = h;
+    callback();
+  };
+  img.onerror = function() {
+    state.logoWidth  = 75;
+    state.logoHeight = 75;
+    callback();
+  };
+  img.src = src;
+}
+
+/* ================================================================
    EVENT HANDLERS
    ================================================================ */
 function selectScheme(key) {
@@ -809,8 +835,16 @@ function bindFormInputs() {
     });
 
   document.getElementById('logoUrl').addEventListener('input', function() {
-    state.logoSrc = this.value.trim() || null;
-    updatePreview();
+    const src = this.value.trim();
+    if (src) {
+      state.logoSrc = src;
+      fitLogoDimensions(src, updatePreview);
+    } else {
+      state.logoSrc   = null;
+      state.logoWidth  = 75;
+      state.logoHeight = 75;
+      updatePreview();
+    }
   });
 }
 
@@ -822,13 +856,15 @@ function bindLogoUpload() {
     reader.onload = ev => {
       state.logoSrc = ev.target.result;
       document.getElementById('logoUrl').value = '';
-      updatePreview();
+      fitLogoDimensions(state.logoSrc, updatePreview);
     };
     reader.readAsDataURL(file);
   });
 
   document.getElementById('resetLogoBtn').addEventListener('click', () => {
-    state.logoSrc = null;
+    state.logoSrc    = null;
+    state.logoWidth  = 75;
+    state.logoHeight = 75;
     document.getElementById('logoUrl').value = '';
     document.getElementById('logoFileInput').value = '';
     updatePreview();
