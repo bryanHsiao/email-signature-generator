@@ -7,6 +7,7 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Sans:opsz,wght@9..40,300;9..40,400;9..40,500;9..40,600&display=swap" rel="stylesheet">
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
   <style>
     /* ============================================================
        CSS VARIABLES & RESET
@@ -267,6 +268,12 @@
       border: 1px solid var(--border);
     }
     .btn-copy-download:hover { color: var(--a2); border-color: var(--a1); background: rgba(255,255,255,0.06); }
+    .btn-copy-image {
+      background: var(--bg-card); color: var(--text-sub);
+      border: 1px solid var(--border);
+    }
+    .btn-copy-image:hover { color: var(--a2); border-color: var(--a1); background: rgba(255,255,255,0.06); }
+    .btn-copy-image:disabled { opacity: 0.5; cursor: not-allowed; transform: none !important; }
 
     /* ── Code block ── */
     .code-card {
@@ -474,6 +481,9 @@
         </button>
         <button class="btn-copy btn-copy-download" id="downloadHtmlBtn">
           <span>⬇</span> 下載 HTML
+        </button>
+        <button class="btn-copy btn-copy-image" id="downloadImgBtn">
+          🖼 下載圖片
         </button>
       </div>
 
@@ -841,6 +851,40 @@ ${signatureHTML}
   document.body.removeChild(a);
   URL.revokeObjectURL(url);
   showToast('✓ signature.html 已下載！');
+});
+
+/* ================================================================
+   DOWNLOAD PNG IMAGE
+   ================================================================ */
+document.getElementById('downloadImgBtn').addEventListener('click', async () => {
+  const btn = document.getElementById('downloadImgBtn');
+  const target = document.getElementById('signaturePreview');
+
+  btn.disabled = true;
+  btn.textContent = '處理中…';
+
+  try {
+    const canvas = await html2canvas(target, {
+      backgroundColor: '#ffffff',
+      scale: 2,
+      useCORS: true,
+      logging: false,
+    });
+    const url = canvas.toDataURL('image/png');
+    const a = Object.assign(document.createElement('a'), {
+      href: url, download: 'signature.png'
+    });
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    showToast('✓ signature.png 已下載！');
+  } catch (err) {
+    showToast('⚠ 截圖失敗，請確認 Logo 圖片來源是否允許跨域');
+    console.error('html2canvas error:', err);
+  } finally {
+    btn.disabled = false;
+    btn.innerHTML = '🖼 下載圖片';
+  }
 });
 
 /* ================================================================
