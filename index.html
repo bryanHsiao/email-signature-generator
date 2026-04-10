@@ -458,11 +458,13 @@
         <!-- 姓名字體 -->
         <div class="field" style="margin-top:12px;">
           <label>英文字體</label>
-          <div id="fontBtnsEn" style="display:flex;gap:6px;flex-wrap:wrap;margin-top:4px;"></div>
+          <select id="fontSelectEn" onchange="selectFont('en', this.value)"
+            style="width:100%;padding:8px 10px;border-radius:8px;border:1px solid rgba(255,255,255,0.12);background:rgba(255,255,255,0.06);color:var(--text);font-size:13px;cursor:pointer;outline:none;"></select>
         </div>
         <div class="field" style="margin-top:8px;">
           <label>中文字體</label>
-          <div id="fontBtnsZh" style="display:flex;gap:6px;flex-wrap:wrap;margin-top:4px;"></div>
+          <select id="fontSelectZh" onchange="selectFont('zh', this.value)"
+            style="width:100%;padding:8px 10px;border-radius:8px;border:1px solid rgba(255,255,255,0.12);background:rgba(255,255,255,0.06);color:var(--text);font-size:13px;cursor:pointer;outline:none;"></select>
         </div>
       </div>
 
@@ -942,27 +944,24 @@ function selectScheme(key) {
 /* ================================================================
    RENDER FONT BUTTONS
    ================================================================ */
-function makeFontBtn(key, f, active, lang) {
-  return `<button onclick="selectFont('${lang}','${key}')"
-    style="padding:5px 12px;border-radius:6px;border:1px solid ${active ? 'var(--a1)' : 'rgba(255,255,255,0.15)'};
-           background:${active ? 'rgba(0,102,255,0.12)' : 'transparent'};
-           color:${active ? 'var(--a1)' : 'var(--text-sub)'};
-           font-family:${f.family};font-size:13px;cursor:pointer;transition:all 0.15s;white-space:nowrap;">
-    ${f.name}
-  </button>`;
-}
-
 function renderFontBtns() {
-  const en = document.getElementById('fontBtnsEn');
-  const zh = document.getElementById('fontBtnsZh');
-  if (en) en.innerHTML = Object.entries(FONTS).map(([k, f]) => makeFontBtn(k, f, k === state.nameFontEn, 'en')).join('');
-  if (zh) zh.innerHTML = Object.entries(FONTS_ZH).map(([k, f]) => makeFontBtn(k, f, k === state.nameFontZh, 'zh')).join('');
+  const enSel = document.getElementById('fontSelectEn');
+  const zhSel = document.getElementById('fontSelectZh');
+  if (enSel) {
+    enSel.innerHTML = Object.entries(FONTS).map(([k, f]) =>
+      `<option value="${k}" ${k === state.nameFontEn ? 'selected' : ''} style="font-family:${f.family};">${f.name}　${f.family.split(',')[0].replace(/'/g,'')}</option>`
+    ).join('');
+  }
+  if (zhSel) {
+    zhSel.innerHTML = Object.entries(FONTS_ZH).map(([k, f]) =>
+      `<option value="${k}" ${k === state.nameFontZh ? 'selected' : ''} style="font-family:${f.family};">${f.name}　${f.family.split(',')[0].replace(/'/g,'')}</option>`
+    ).join('');
+  }
 }
 
 function selectFont(lang, key) {
   if (lang === 'en') { loadGoogleFont(key); state.nameFontEn = key; }
   else               { state.nameFontZh = key; }
-  renderFontBtns();
   updatePreview();
 }
 
