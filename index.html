@@ -1120,9 +1120,11 @@ document.getElementById('downloadImgBtn').addEventListener('click', async () => 
   btn.textContent = '處理中…';
 
   try {
+    const targetWidth = 1142;
+    const scale = targetWidth / target.offsetWidth;
     const canvas = await html2canvas(target, {
       backgroundColor: '#ffffff',
-      scale: 1,
+      scale: scale,
       useCORS: true,
       logging: false,
     });
