@@ -556,25 +556,52 @@ const SCHEMES = {
 };
 
 /* ================================================================
-   DEFAULT LOGO (SVG → base64 data URI)
+   DEFAULT LOGO (Canvas → PNG data URI)
+   Using PNG instead of SVG for maximum email client compatibility
+   (HCL Notes, Outlook, Gmail all support data:image/png)
    ================================================================ */
 function makeDefaultLogoURI(p, s) {
-  const svg = `<svg xmlns="http://www.w3.org/2000/svg" width="75" height="75" viewBox="0 0 75 75">
-  <defs>
-    <linearGradient id="g" x1="0%" y1="0%" x2="100%" y2="100%">
-      <stop offset="0%" stop-color="${p}"/>
-      <stop offset="100%" stop-color="${s}"/>
-    </linearGradient>
-  </defs>
-  <rect width="75" height="75" rx="14" fill="url(#g)"/>
-  <rect x="7" y="7" width="61" height="61" rx="10" fill="none" stroke="rgba(255,255,255,0.18)" stroke-width="1"/>
-  <text x="37.5" y="27" text-anchor="middle" dominant-baseline="middle"
-        font-family="Arial,sans-serif" font-size="9.5" font-weight="700"
-        fill="rgba(255,255,255,0.65)" letter-spacing="1.5">CHUNTAI</text>
-  <text x="37.5" y="52" text-anchor="middle" dominant-baseline="middle"
-        font-family="Arial,sans-serif" font-size="24" font-weight="800" fill="#ffffff">CT</text>
-</svg>`;
-  return 'data:image/svg+xml;base64,' + btoa(svg);
+  const size = 75;
+  const canvas = document.createElement('canvas');
+  canvas.width = size; canvas.height = size;
+  const ctx = canvas.getContext('2d');
+
+  function roundedRect(x, y, w, h, r) {
+    ctx.beginPath();
+    ctx.moveTo(x + r, y);
+    ctx.lineTo(x + w - r, y); ctx.quadraticCurveTo(x + w, y,     x + w, y + r);
+    ctx.lineTo(x + w, y + h - r); ctx.quadraticCurveTo(x + w, y + h, x + w - r, y + h);
+    ctx.lineTo(x + r, y + h); ctx.quadraticCurveTo(x,     y + h, x,     y + h - r);
+    ctx.lineTo(x, y + r); ctx.quadraticCurveTo(x,     y,     x + r, y);
+    ctx.closePath();
+  }
+
+  // Gradient background
+  const grad = ctx.createLinearGradient(0, 0, size, size);
+  grad.addColorStop(0, p); grad.addColorStop(1, s);
+  roundedRect(0, 0, size, size, 14);
+  ctx.fillStyle = grad;
+  ctx.fill();
+
+  // Inner border
+  roundedRect(7, 7, 61, 61, 10);
+  ctx.strokeStyle = 'rgba(255,255,255,0.22)';
+  ctx.lineWidth = 1;
+  ctx.stroke();
+
+  // "CHUNTAI" subtitle
+  ctx.fillStyle = 'rgba(255,255,255,0.65)';
+  ctx.font = 'bold 8px Arial';
+  ctx.textAlign = 'center';
+  ctx.textBaseline = 'middle';
+  ctx.fillText('CHUNTAI', size / 2, 24);
+
+  // "CT" main text
+  ctx.fillStyle = '#ffffff';
+  ctx.font = 'bold 26px Arial';
+  ctx.fillText('CT', size / 2, 51);
+
+  return canvas.toDataURL('image/png');
 }
 
 function getLogoSrc() {
