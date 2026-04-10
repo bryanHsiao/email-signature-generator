@@ -256,15 +256,21 @@
       outline: none;
       cursor: text;
       border-radius: 3px;
-      transition: box-shadow 0.15s, background 0.15s;
+      padding: 1px 3px;
+      margin: 0 -3px;
+      transition: background 0.12s, box-shadow 0.12s, color 0.12s;
       display: inline-block;
-      min-width: 4px;
+      min-width: 6px;
+      position: relative;
     }
     .editable-label:hover {
-      box-shadow: 0 0 0 2px rgba(255,255,255,0.35), inset 0 0 0 100px rgba(255,255,255,0.12);
+      background: rgba(255,255,255,0.22);
+      box-shadow: 0 0 0 1.5px rgba(255,255,255,0.5);
     }
     .editable-label:focus {
-      box-shadow: 0 0 0 2px rgba(255,255,255,0.8), inset 0 0 0 100px rgba(255,255,255,0.18);
+      background: #ffffff;
+      color: #1a1a2e !important;
+      box-shadow: 0 0 0 2px #3b82f6;
     }
 
     /* ── Copy buttons ── */
@@ -415,62 +421,12 @@
         </div>
       </div>
 
-      <!-- 個人資訊 -->
+      <!-- 外觀設定 -->
       <div class="card">
-        <div class="card-title">個人資訊</div>
-        <div class="field">
-          <label>英文姓名</label>
-          <input type="text" id="nameEn" value="Bryan Hsiao" placeholder="English Name">
-        </div>
-        <div class="field">
-          <label>中文姓名</label>
-          <input type="text" id="nameZh" value="蕭恩政" placeholder="中文姓名">
-        </div>
+        <div class="card-title">外觀設定</div>
         <div class="field">
           <label>姓名顏色</label>
           <input type="color" id="nameColor" value="#1a1a2e" style="width:48px;height:32px;padding:2px;border-radius:6px;border:1px solid rgba(255,255,255,0.15);background:transparent;cursor:pointer;">
-        </div>
-      </div>
-
-      <!-- 公司資訊 -->
-      <div class="card">
-        <div class="card-title">公司資訊</div>
-        <div class="field">
-          <label>公司英文名稱</label>
-          <input type="text" id="companyEn" value="ChunTai Tech Industrial Co.,Ltd">
-        </div>
-        <div class="field">
-          <label>公司中文名稱</label>
-          <input type="text" id="companyZh" value="崇太科技實業有限公司">
-        </div>
-      </div>
-
-      <!-- 聯絡方式 -->
-      <div class="card">
-        <div class="card-title">聯絡方式</div>
-        <div class="field">
-          <label>內線電話</label>
-          <input type="text" id="tieLine" value="886-2-2558-1229 # 231" placeholder="886-2-XXXX-XXXX # XXX">
-        </div>
-        <div class="field">
-          <label>手機號碼</label>
-          <input type="text" id="mobile" value="0928-662-718" placeholder="0900-000-000">
-        </div>
-        <div class="field">
-          <label>Email</label>
-          <input type="email" id="email" value="bryanhsiao@domino.com.tw">
-        </div>
-        <div class="field">
-          <label>公司網站</label>
-          <input type="url" id="website" value="http://www.domino.com.tw">
-        </div>
-        <div class="field">
-          <label>郵寄地址</label>
-          <input type="text" id="address" value="台北市長安西路180號10樓之一">
-        </div>
-        <div class="field">
-          <label>地區</label>
-          <input type="text" id="location" value="Taipei Taiwan" placeholder="City Country">
         </div>
       </div>
 
@@ -499,6 +455,7 @@
         <div class="email-body">
           <div class="email-body-text">Hi，附上相關資料，如有任何問題請不吝告知，謝謝。</div>
           <div class="email-divider"></div>
+          <div style="font-size:11px;color:#aaa;margin-bottom:8px;letter-spacing:0.3px;">✏️ 點擊簽名中的任意文字即可直接編輯</div>
           <div id="signaturePreview"></div>
         </div>
       </div>
@@ -868,11 +825,8 @@ function selectScheme(key) {
 }
 
 function bindFormInputs() {
-  ['nameEn','nameZh','companyEn','companyZh','tieLine','mobile','email','website','address','location']
-    .forEach(id => {
-      const el = document.getElementById(id);
-      if (el) el.addEventListener('input', () => { state[id] = el.value; updatePreview(); });
-    });
+  // 文字欄位已改為預覽內直接編輯，此處僅保留 nameColor
+  // （若未來需要重新加回表單欄位，在此陣列新增 id 即可）
 
   const nameColorEl = document.getElementById('nameColor');
   if (nameColorEl) nameColorEl.addEventListener('input', () => { state.nameColor = nameColorEl.value; updatePreview(); });
