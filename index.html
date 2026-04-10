@@ -251,16 +251,20 @@
       height: 1px; background: #ddd; margin-bottom: 18px;
     }
     #signaturePreview { display: block; }
-    /* ── Inline editable labels in preview ── */
+    /* ── Inline editable fields in preview ── */
+    .editable-label {
+      outline: none;
+      cursor: text;
+      border-radius: 3px;
+      transition: box-shadow 0.15s, background 0.15s;
+      display: inline-block;
+      min-width: 4px;
+    }
     .editable-label:hover {
-      border-bottom-color: rgba(0,0,0,0.55) !important;
-      background: rgba(0,102,255,0.06);
-      border-radius: 2px;
+      box-shadow: 0 0 0 2px rgba(255,255,255,0.35), inset 0 0 0 100px rgba(255,255,255,0.12);
     }
     .editable-label:focus {
-      border-bottom-color: #0066ff !important;
-      background: rgba(0,102,255,0.08);
-      border-radius: 2px;
+      box-shadow: 0 0 0 2px rgba(255,255,255,0.8), inset 0 0 0 100px rgba(255,255,255,0.18);
     }
 
     /* ── Copy buttons ── */
@@ -663,32 +667,38 @@ function generateSignatureHTML(forPreview = false) {
   const logoW = state.logoWidth;
   const logoH = state.logoHeight;
 
-  // ── Editable label helper ──
-  // forPreview: wrap in contenteditable span so user can click & edit inline
-  // forEmail:   plain escaped text
-  const lbl = (field, text) => forPreview
-    ? `<span contenteditable="true" data-field="${field}" class="editable-label" style="outline:none;cursor:text;border-bottom:1px dashed rgba(0,0,0,0.25);display:inline-block;">${esc(text)}</span>`
+  // ── Editable helper ──
+  // Preview: contenteditable span; Email: plain escaped text
+  const ed = (field, text, extraStyle = '') => forPreview
+    ? `<span contenteditable="true" data-field="${field}" class="editable-label"${extraStyle ? ` style="${extraStyle}"` : ''}>${esc(text)}</span>`
     : esc(text);
 
   // ── Contact rows ──
+  const P = 'margin:0 0 4px 0;padding:0;font-size:12px;color:#333333;font-family:Arial,Helvetica,sans-serif;line-height:1.4;';
   const contactLines = [];
   if (tieLine) contactLines.push(
-    `<p style="margin:0 0 4px 0;padding:0;font-size:12px;color:#333333;font-family:Arial,Helvetica,sans-serif;line-height:1.4;">${lbl('labelTieLine', labelTieLine)}：${esc(tieLine)}</p>`
+    `<p style="${P}">${ed('labelTieLine', labelTieLine)}：${ed('tieLine', tieLine)}</p>`
   );
   if (mobile) contactLines.push(
-    `<p style="margin:0 0 4px 0;padding:0;font-size:12px;color:#333333;font-family:Arial,Helvetica,sans-serif;line-height:1.4;">${lbl('labelMobile', labelMobile)}：${esc(mobile)}</p>`
+    `<p style="${P}">${ed('labelMobile', labelMobile)}：${ed('mobile', mobile)}</p>`
   );
   if (email) contactLines.push(
-    `<p style="margin:0 0 4px 0;padding:0;font-size:12px;color:#333333;font-family:Arial,Helvetica,sans-serif;line-height:1.4;">${lbl('labelEmail', labelEmail)}：<a href="mailto:${esc(email)}" style="color:${primary};text-decoration:none;">${esc(email)}</a></p>`
+    `<p style="${P}">${ed('labelEmail', labelEmail)}：${
+      forPreview
+        ? ed('email', email, `color:${primary};`)
+        : `<a href="mailto:${esc(email)}" style="color:${primary};text-decoration:none;">${esc(email)}</a>`
+    }</p>`
   );
 
   // ── Footer line: address + website + location ──
   const footerParts = [];
-  if (address) footerParts.push(`— ${lbl('labelMailing', labelMailing)}：${esc(address)}`);
+  if (address) footerParts.push(`— ${ed('labelMailing', labelMailing)}：${ed('address', address)}`);
   if (website) footerParts.push(
-    `<a href="${esc(website)}" target="_blank" style="color:${primary};text-decoration:none;">${esc(website)}</a>`
+    forPreview
+      ? ed('website', website, `color:${primary};`)
+      : `<a href="${esc(website)}" target="_blank" style="color:${primary};text-decoration:none;">${esc(website)}</a>`
   );
-  if (location) footerParts.push(esc(location));
+  if (location) footerParts.push(ed('location', location));
   const footerHTML = footerParts.length
     ? `<p style="margin:6px 0 0 0;padding:0;font-size:11px;color:#888888;font-family:Arial,Helvetica,sans-serif;line-height:1.5;">${footerParts.join('&nbsp;&nbsp;')}</p>`
     : '';
@@ -710,7 +720,7 @@ function generateSignatureHTML(forPreview = false) {
               </td>
               <td style="vertical-align:middle;">
                 <span style="font-size:14px;font-weight:700;color:#ffffff;font-family:Arial,Helvetica,sans-serif;line-height:1.4;">
-                  ${esc(companyZh)}&nbsp;|&nbsp;${esc(companyEn)}
+                  ${ed('companyZh', companyZh)}&nbsp;|&nbsp;${ed('companyEn', companyEn)}
                 </span>
               </td>
             </tr>
@@ -726,7 +736,7 @@ function generateSignatureHTML(forPreview = false) {
 
         <!-- Name -->
         <p style="margin:0 0 8px 0;padding:0;font-size:17px;font-weight:700;color:${state.nameColor};font-family:Arial,Helvetica,sans-serif;line-height:1.2;">
-          ${esc(nameEn)}&nbsp;&nbsp;${esc(nameZh)}
+          ${ed('nameEn', nameEn)}&nbsp;&nbsp;${ed('nameZh', nameZh)}
         </p>
 
         <!-- Contact rows -->
@@ -806,18 +816,19 @@ function updatePreview() {
   document.getElementById('codePreview').textContent = emailHtml;
   document.getElementById('logoThumb').src = getLogoSrc();
 
-  // ── Bind inline editable labels ──
+  // ── Bind inline editable fields ──
   document.querySelectorAll('#signaturePreview .editable-label').forEach(span => {
     span.addEventListener('blur', () => {
       const field = span.dataset.field;
-      const val = span.textContent.trim() || span.textContent;
-      if (state[field] !== val) {
-        state[field] = val;
-        // 只更新 code panel，不重繪 preview（避免搶走 focus）
-        document.getElementById('codePreview').textContent = generateSignatureHTML(false);
-      }
+      const val = span.textContent;
+      state[field] = val;
+      // 同步回左側表單
+      const formEl = document.getElementById(field);
+      if (formEl) formEl.value = val;
+      // 更新 code panel（不重繪 preview，保留編輯體驗）
+      document.getElementById('codePreview').textContent = generateSignatureHTML(false);
     });
-    // 防止 Enter 換行
+    // Enter 確認，不換行
     span.addEventListener('keydown', e => {
       if (e.key === 'Enter') { e.preventDefault(); span.blur(); }
     });
